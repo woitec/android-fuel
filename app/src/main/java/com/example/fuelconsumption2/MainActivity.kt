@@ -1,6 +1,8 @@
 package com.example.fuelconsumption2
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -15,6 +17,16 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        var number = 0
+
+        val buttonAddOne = findViewById<Button>(R.id.buttonAddOne)
+        val viewNumber = findViewById<TextView>(R.id.viewNumber)
+
+        buttonAddOne.setOnClickListener {
+            number++
+            viewNumber.text = number.toString()
         }
     }
 }

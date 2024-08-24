@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Fuel Consumption 2</string>
+    <string name="buttonAddOne">Add 1</string>
+    <string name="viewNumberPlaceholder">1</string>
 </resources>
