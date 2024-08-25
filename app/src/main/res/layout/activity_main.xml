@@ -8,22 +8,115 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/viewNumber"
-        android:layout_width="wrap_content"
+        android:id="@+id/textVehicleModel"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="@string/viewNumberPlaceholder"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/textVehicleModel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/buttonAddOne"
+        android:id="@+id/buttonChooseVehicle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/buttonAddOne"
-        app:layout_constraintBottom_toTopOf="@+id/viewNumber"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        android:text="@string/buttonChooseVehicle"
+        app:cornerRadius="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textVehicleModel" />
+
+    <Button
+        android:id="@+id/buttonFilterHistory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        android:text="@string/buttonFilterHistory"
+        app:cornerRadius="8dp"
+        app:layout_constraintEnd_toStartOf="@+id/buttonAddFuelConsumption"
+        app:layout_constraintStart_toEndOf="@+id/buttonChooseVehicle"
+        app:layout_constraintTop_toBottomOf="@+id/textVehicleModel" />
+
+    <Button
+        android:id="@+id/buttonAddFuelConsumption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="8dp"
+        android:text="@string/buttonAddFuelConsumption"
+        app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textVehicleModel" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="463dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/textAverageConsumptionDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonChooseVehicle"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/textAverageConsumptionDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/textAverageConsumptionDescription"
+        app:layout_constraintEnd_toStartOf="@+id/textAverageConsumption"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
+
+    <TextView
+        android:id="@+id/textAverageConsumption"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/textAverageConsumption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textAverageConsumptionDescription"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
+
+    <TextView
+        android:id="@+id/textAverageCostDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/textAverageCostDescription"
+        app:layout_constraintEnd_toStartOf="@+id/textAverageCost"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textAverageConsumptionDescription" />
+
+    <TextView
+        android:id="@+id/textAverageCost"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/textAverageCost"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textAverageCostDescription"
+        app:layout_constraintTop_toBottomOf="@+id/textAverageConsumption" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

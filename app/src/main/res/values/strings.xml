@@ -1,5 +1,11 @@
 <resources>
     <string name="app_name">Fuel Consumption 2</string>
-    <string name="buttonAddOne">Add 1</string>
-    <string name="viewNumberPlaceholder">1</string>
+    <string name="buttonChooseVehicle">Choose vehicle</string>
+    <string name="buttonFilterHistory">Filter history</string>
+    <string name="buttonAddFuelConsumption">Add fuel consumption</string>
+    <string name="textVehicleModel">Seat Ibiza 2004</string>
+    <string name="textAverageConsumptionDescription">Average consumption:</string>
+    <string name="textAverageConsumption">12.09 L/100km</string>
+    <string name="textAverageCostDescription">Average cost:</string>
+    <string name="textAverageCost">30.25 zł/100km</string>
 </resources>
