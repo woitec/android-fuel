@@ -3,7 +3,6 @@
     <string name="buttonChooseVehicle">Choose vehicle</string>
     <string name="buttonFilterHistory">Filter history</string>
     <string name="buttonAddFuelConsumption">Add fuel consumption</string>
-    <string name="textVehicleModel">Seat Ibiza 2004</string>
     <string name="textAverageConsumptionDescription">Average consumption:</string>
     <string name="textAverageConsumption">12.09 L/100km</string>
     <string name="textAverageCostDescription">Average cost:</string>

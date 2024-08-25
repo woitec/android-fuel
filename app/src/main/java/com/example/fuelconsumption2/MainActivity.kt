@@ -22,11 +22,9 @@ class MainActivity : AppCompatActivity() {
         var number = 0
 
         val buttonAddOne = findViewById<Button>(R.id.buttonChooseVehicle)
-        val viewNumber = findViewById<TextView>(R.id.textVehicleModel)
 
         buttonAddOne.setOnClickListener {
             number++
-            viewNumber.text = number.toString()
         }
     }
 }
