@@ -8,7 +8,7 @@ import com.example.fuelconsumption2.data.entities.Tanking
 @Dao
 interface TankingDao {
     @Query("SELECT * FROM tanking WHERE TankingId = :tankingId")
-    fun getTankingByid(tankingId: Int): Tanking
+    fun getTankingById(tankingId: Int): Tanking
 
     @Insert
     fun insertTanking(vararg tanking: Tanking)
