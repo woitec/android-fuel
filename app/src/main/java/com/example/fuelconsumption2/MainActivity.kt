@@ -7,6 +7,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.room.Room
+import com.example.fuelconsumption2.data.AppDatabase
+import com.example.fuelconsumption2.data.entities.Configuration
+import com.example.fuelconsumption2.data.entities.Tanking
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,12 +23,15 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        var number = 0
+        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "db-tankings-app").build()
+
+        val configurationDao = db.configurationDao()
+        val tankingDao = db.tankingDao()
+        val vehicleDao = db.vehicleDao()
+
+        val configuration: Configuration = configurationDao.getConfiguration()
+        val tankings: List<Tanking> = tankingDao.getAllTankings()
 
         val buttonAddOne = findViewById<Button>(R.id.buttonChooseVehicle)
-
-        buttonAddOne.setOnClickListener {
-            number++
-        }
     }
 }

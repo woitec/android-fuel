@@ -1,4 +1,4 @@
-package com.example.fuelconsumption2.repository
+package com.example.fuelconsumption2.data.repository
 
 import com.example.fuelconsumption2.data.dao.VehicleDao
 import com.example.fuelconsumption2.data.entities.Vehicle

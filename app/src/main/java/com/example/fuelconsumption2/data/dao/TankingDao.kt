@@ -12,4 +12,7 @@ interface TankingDao {
 
     @Insert
     fun insertTanking(vararg tanking: Tanking)
+
+    @Query("SELECT * FROM tanking")
+    fun getAllTankings(): List<Tanking>
 }
