@@ -15,4 +15,7 @@ interface TankingDao {
 
     @Query("SELECT * FROM tanking")
     fun getAllTankings(): List<Tanking>
+
+    @Query("SELECT * FROM tanking WHERE vehicle_id = :vehicleId")
+    fun getAllTankingsByVehicleId(vehicleId: Int): List<Tanking>
 }
