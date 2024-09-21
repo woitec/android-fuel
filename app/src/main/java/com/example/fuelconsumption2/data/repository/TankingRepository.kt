@@ -6,12 +6,13 @@ import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.dao.TankingDao
 import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
 class TankingRepository(context: Context) {
     val db = Room.databaseBuilder(context, AppDatabase::class.java, "db-tankings-app").build()
 
-    suspend fun getTankingId(tankingId: Int): Tanking {
+    suspend fun getTankingById(tankingId: Int): Tanking {
         return withContext(Dispatchers.IO) {
             return@withContext db.tankingDao().getTankingById(tankingId)
         }
@@ -23,9 +24,7 @@ class TankingRepository(context: Context) {
         }
     }
 
-    suspend fun getAllTankings(): List<Tanking> {
-        return withContext(Dispatchers.IO) {
-            return@withContext db.tankingDao().getAllTankings()
-        }
+    fun getAllTankings(): Flow<List<Tanking>> {
+        return db.tankingDao().getAllTankings()
     }
 }

@@ -37,7 +37,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -48,4 +47,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.lifecycle.livedata)
+    implementation(libs.lifecycle.runtime)
+    implementation(libs.lifecycle.viewmodel)
 }
