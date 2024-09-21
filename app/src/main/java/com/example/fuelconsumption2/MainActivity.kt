@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -29,29 +30,15 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val db = TankingRepository(this)
-//        val configurationDao = db.configurationDao()
-//        val tankingDao = db.tankingDao()
-//        val vehicleDao = db.vehicleDao()
-
-        var tankings: List<Tanking> = listOf()
-        lifecycleScope.launch {
-            tankings = db.getAllTankings()
-        }
-
-        //val configuration: Configuration = configurationDao.getConfiguration()
-
-        val tankingsRecyclerAdapter = TankingsRecyclerAdapter(tankings)
-
-//        val tankingsRecyclerAdapter = TankingsRecyclerAdapter(listOf(
-//            Tanking(0,0,0,10, 14.8f, "14.09.2024", "21:43", 2.49f, "LPG", 36.85f),
-//            Tanking(1,0,0,10, 14.8f, "14.09.2024", "21:43", 2.49f, "LPG", 36.85f),
-//            Tanking(2,0,0,10, 14.8f, "14.09.2024", "21:43", 2.49f, "LPG", 36.85f),
-//            Tanking(3,0,0,10, 14.8f, "14.09.2024", "21:43", 2.49f, "LPG", 36.85f)
-//        ))
-
+        val tankingsData = mutableListOf<Tanking>()
+        val tankingsRecyclerViewAdapter = TankingsRecyclerAdapter(tankingsData)
         val tankingsView: RecyclerView = findViewById(R.id.tankingsView)
         tankingsView.layoutManager = LinearLayoutManager(this)
-        tankingsView.adapter = tankingsRecyclerAdapter
+        tankingsView.adapter = tankingsRecyclerViewAdapter
+        val db = TankingRepository(this)
+        lifecycleScope.launch {
+            tankingsData.plus(db.getAllTankings())
+            tankingsRecyclerViewAdapter.notifyDataSetChanged()
+        }
     }
 }
