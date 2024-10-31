@@ -1,23 +1,39 @@
 package com.example.fuelconsumption2
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
-import com.example.fuelconsumption2.data.entities.Configuration
-import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var tankingsSummaryViewModel: TankingsSummaryViewModel
+
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "FuelConsumptionApp.db"
+        ).build()
+    }
+
+    private val tankingsSummaryViewModel by viewModels<TankingsSummaryViewModel>(
+        factoryProducer = {
+            object: ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return TankingsSummaryViewModel(db) as T
+                }
+            }
+        }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,8 +45,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        tankingsSummaryViewModel = ViewModelProvider(this)[TankingsSummaryViewModel::class.java]
-
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter(tankingsSummaryViewModel.tankings)
 
 //      val configuration: Configuration = configurationDao.getConfiguration()
@@ -41,16 +55,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-//            tankingsSummaryViewModel.updateTankings(
-//                Tanking(0,0,0,10, 14.8f, "14.09.2024", "21:43", 2.49f, "LPG", 36.85f),
-//                Tanking(1,0,0,20, 14.1f, "15.09.2024", "21:34", 2.49f, "LPG", 35.11f),
-//                Tanking(2,0,0,30, 14.2f, "16.09.2024", "21:49", 2.49f, "LPG", 35.36f),
-//                Tanking(3,0,0,40, 14.9f, "17.09.2024", "21:40", 2.49f, "LPG", 37.10f)
-//        )
-
-            tankingsSummaryViewModel.getAllTankings().collect { currentTankings ->
-//                Log.i("TEST", currentTankings.joinToString(",\n"))
-                tankingsSummaryViewModel.updateTankingsListView(currentTankings)
+            tankingsSummaryViewModel.getAllTankings().collect { currentAllTankings ->
+//                Log.i("TEST", currentAllTankings.joinToString(",\n"))
+                tankingsSummaryViewModel.updateTankingsRecyclerView(currentAllTankings)
 //                Log.i("TEST", tankingsSummaryViewModel.tankings.joinToString(",\n"))
                 tankingsRecyclerAdapter.notifyDataSetChanged()
             }

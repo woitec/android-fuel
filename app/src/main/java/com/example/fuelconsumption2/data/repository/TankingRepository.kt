@@ -9,9 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-class TankingRepository(context: Context) {
-    val db = Room.databaseBuilder(context, AppDatabase::class.java, "db-tankings-app").build()
-
+class TankingRepository(private val db: AppDatabase) {
     suspend fun getTankingById(tankingId: Int): Tanking {
         return withContext(Dispatchers.IO) {
             return@withContext db.tankingDao().getTankingById(tankingId)

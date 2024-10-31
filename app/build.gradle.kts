@@ -51,4 +51,7 @@ dependencies {
     implementation(libs.lifecycle.livedata)
     implementation(libs.lifecycle.runtime)
     implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.ktx)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
 }

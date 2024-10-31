@@ -1,24 +1,24 @@
 package com.example.fuelconsumption2
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import kotlinx.coroutines.flow.Flow
 
-class TankingsSummaryViewModel(application: Application) : AndroidViewModel(application) {
-    private val tankingRepository = TankingRepository(application.applicationContext)
+class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
+    private val tankingRepository = TankingRepository(db)
     val tankings = mutableListOf<Tanking>()
 
-    fun updateTankingsListView(eventData: List<Tanking>) {
+    fun updateTankingsRecyclerView(eventData: List<Tanking>) {
         tankings.clear()
         tankings.addAll(eventData)
     }
 
-    suspend fun updateTankings(vararg newTankings:Tanking) {
-        tankingRepository.insertTanking(*newTankings)
+    suspend fun updateTankings(vararg newTanking: Tanking) {
+        tankingRepository.insertTanking(*newTanking)
     }
 
     fun getAllTankings(): Flow<List<Tanking>> {
