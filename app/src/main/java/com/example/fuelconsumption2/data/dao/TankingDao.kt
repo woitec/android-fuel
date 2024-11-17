@@ -19,4 +19,10 @@ interface TankingDao {
 
     @Query("SELECT * FROM tanking WHERE vehicle_id = :vehicleId")
     fun getAllTankingsByVehicleId(vehicleId: Int): List<Tanking>
+
+    @Query("SELECT fuel_amount FROM tanking WHERE vehicle_id = :vehicleId")
+    fun getAllFuelAmountsByVehicleId(vehicleId: Int): Flow<List<Float?>>
+
+    @Query("SELECT * FROM tanking WHERE vehicle_id = :vehicleId AND timestamp BETWEEN :start AND :end")
+    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long, end: Long): Flow<List<Tanking>>
 }

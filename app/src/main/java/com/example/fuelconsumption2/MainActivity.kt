@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        tankingsSummaryViewModel.populateDefaults()
+
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter(tankingsSummaryViewModel.tankings)
 
 //      val configuration: Configuration = configurationDao.getConfiguration()

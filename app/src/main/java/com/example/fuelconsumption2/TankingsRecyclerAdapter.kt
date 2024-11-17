@@ -36,13 +36,13 @@ class TankingsRecyclerAdapter(private val tankingsList: List<Tanking>): Recycler
     override fun getItemCount(): Int = tankingsList.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.dateText.text = tankingsList[position].Date
-        holder.timeText.text = tankingsList[position].Time
+        holder.dateText.text = SteroidDate(tankingsList[position].Timestamp).displayDate()
+        holder.timeText.text = SteroidDate(tankingsList[position].Timestamp).displayTime()
         holder.fuelTypeText.text = tankingsList[position].FuelType
         holder.fuelAmountText.text = tankingsList[position].FuelAmount.toString()
         holder.priceText.text = tankingsList[position].Price.toString()
         holder.costText.text = tankingsList[position].Cost.toString()
-        holder.kilometersDifferenceText.text = (tankingsList[position].KilometersAfter - tankingsList[position].KilometersBefore).toString()
+        holder.kilometersDifferenceText.text = ((tankingsList[position].KilometersAfter ?: 0) - (tankingsList[position].KilometersBefore ?: 0)).toString()
     }
 
 }

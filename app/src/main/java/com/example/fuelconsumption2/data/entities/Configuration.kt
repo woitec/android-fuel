@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 
 @Entity (tableName = "configuration")
 data class Configuration (
-    @PrimaryKey val ConfigurationId: Int,
-    @ColumnInfo(name = "recent_vehicle_id") val RecentVehicleId: Int,
+    @PrimaryKey(autoGenerate = true) val ConfigurationId: Int,
+    @ColumnInfo(name = "recent_vehicle_id") val RecentVehicleId: Int?,
     @ColumnInfo(name = "filter_preferences") val FilterPreferences: String?
     )

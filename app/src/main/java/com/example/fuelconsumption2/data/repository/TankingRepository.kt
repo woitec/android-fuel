@@ -9,20 +9,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 
-class TankingRepository(private val db: AppDatabase) {
+class TankingRepository(private val tankingDao: TankingDao) {
     suspend fun getTankingById(tankingId: Int): Tanking {
         return withContext(Dispatchers.IO) {
-            return@withContext db.tankingDao().getTankingById(tankingId)
+            return@withContext tankingDao.getTankingById(tankingId)
         }
     }
 
     suspend fun insertTanking(vararg tanking: Tanking) {
         withContext(Dispatchers.IO) {
-            db.tankingDao().insertTanking(*tanking)
+            tankingDao.insertTanking(*tanking)
         }
     }
 
     fun getAllTankings(): Flow<List<Tanking>> {
-        return db.tankingDao().getAllTankings()
+        return tankingDao.getAllTankings()
+    }
+
+    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long, end: Long): Flow<List<Tanking>> {
+        return tankingDao.getAllTankingsInBetweenByVehicleId(vehicleId, start, end)
     }
 }
