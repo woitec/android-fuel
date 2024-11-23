@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/buttonChooseVehicle"
+        android:id="@+id/buttonAddVehicle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -41,7 +41,7 @@
         android:text="@string/buttonFilterHistory"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toStartOf="@+id/buttonAddFuelConsumption"
-        app:layout_constraintStart_toEndOf="@+id/buttonChooseVehicle"
+        app:layout_constraintStart_toEndOf="@+id/buttonAddVehicle"
         app:layout_constraintTop_toBottomOf="@+id/spinnerVehicleModel" />
 
     <Button
@@ -66,7 +66,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="@id/textAverageConsumption"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonChooseVehicle" />
+        app:layout_constraintTop_toBottomOf="@+id/buttonAddVehicle" />
 
     <TextView
         android:id="@+id/textAverageConsumptionDescription"

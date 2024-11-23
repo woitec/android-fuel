@@ -4,10 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Tanking
+import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
+import com.example.fuelconsumption2.data.repository.VehicleRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -15,8 +23,14 @@ import java.time.temporal.ChronoUnit
 
 class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
+    private val vehicleRepository = VehicleRepository(db.vehicleDao())
     private val configurationRepository = ConfigurationRepository(db.configurationDao())
-    private val state = MutableStateFlow(TankingsSummaryState())
+    private val _state = MutableStateFlow(TankingsSummaryState())
+    val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState())
+
+    private val _events = MutableSharedFlow<TankingEvent>()
+    val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
+
     val tankings = mutableListOf<Tanking>()
 
     fun populateDefaults() {
@@ -53,7 +67,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     0f
                 }
 
-                state.update {
+                _state.update {
                     it.copy(
                         visibleTankings = visibleTankings,
                         currentDate = SteroidDate(currentTimestamp),
@@ -68,6 +82,40 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
+    fun onEvent(event: TankingEvent) {
+        viewModelScope.launch {
+            _events.emit(event)
+        }
+    }
+
+//    fun updateTankings(
+//        visibleTankings: Flow<List<Tanking>>?,
+//        currentDate: SteroidDate?,
+//        averageConsumption: Float?,
+//        averageCost: Float?,
+//        isAddingVehicle: Boolean,
+//        isFilteringHistory: Boolean,
+//        isAddingTanking: Boolean,
+//        currentVehicle: Int?,
+//        historyFilterStart: SteroidDate?,
+//        historyFilterEnd: SteroidDate?
+//    ) {
+//        _state.update {
+//            it.copy(
+//                visibleTankings = visibleTankings,
+//                currentDate = currentDate,
+//                averageConsumption = averageConsumption,
+//                averageCost = averageCost,
+//                isAddingVehicle = isAddingVehicle,
+//                isFilteringHistory = isFilteringHistory,
+//                isAddingTanking = isAddingTanking,
+//                currentVehicle = currentVehicle,
+//                historyFilterStart = historyFilterStart,
+//                historyFilterEnd = historyFilterEnd
+//            )
+//        }
+//    }
+
     fun updateTankingsRecyclerView(eventData: List<Tanking>) {
         tankings.clear()
         tankings.addAll(eventData)
@@ -81,5 +129,17 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     fun getAllTankings(): Flow<List<Tanking>> {
         return tankingRepository.getAllTankings()
+    }
+
+    fun getVehicleById(vehicleId: Int): Flow<Vehicle> {
+        return vehicleRepository.getVehicleById(vehicleId)
+    }
+
+    fun getAllVehiclesForAddingTanking(): Flow<List<Vehicle>> {
+        return vehicleRepository.getAllVehiclesForAddingTanking()
+    }
+
+    fun getRecentVehicleId(): Int? {
+        return configurationRepository.getRecentVehicleId()
     }
 }

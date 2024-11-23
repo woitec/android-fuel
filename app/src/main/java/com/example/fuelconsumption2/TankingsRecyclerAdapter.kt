@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fuelconsumption2.data.entities.Tanking
 
-class TankingsRecyclerAdapter(private val tankingsList: List<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
+class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val dateText: TextView
         val timeText: TextView
@@ -33,16 +33,20 @@ class TankingsRecyclerAdapter(private val tankingsList: List<Tanking>): Recycler
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = tankingsList.size
+    override fun getItemCount(): Int = tankings.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.dateText.text = SteroidDate(tankingsList[position].Timestamp).displayDate()
-        holder.timeText.text = SteroidDate(tankingsList[position].Timestamp).displayTime()
-        holder.fuelTypeText.text = tankingsList[position].FuelType
-        holder.fuelAmountText.text = tankingsList[position].FuelAmount.toString()
-        holder.priceText.text = tankingsList[position].Price.toString()
-        holder.costText.text = tankingsList[position].Cost.toString()
-        holder.kilometersDifferenceText.text = ((tankingsList[position].KilometersAfter ?: 0) - (tankingsList[position].KilometersBefore ?: 0)).toString()
+        holder.dateText.text = SteroidDate(tankings[position].Timestamp).displayDate()
+        holder.timeText.text = SteroidDate(tankings[position].Timestamp).displayTime()
+        holder.fuelTypeText.text = tankings[position].FuelType
+        holder.fuelAmountText.text = tankings[position].FuelAmount.toString()
+        holder.priceText.text = tankings[position].Price.toString()
+        holder.costText.text = tankings[position].Cost.toString()
+        holder.kilometersDifferenceText.text = ((tankings[position].KilometersAfter ?: 0) - (tankings[position].KilometersBefore ?: 0)).toString()
     }
 
+    fun updateTankings(newTankings: List<Tanking>) {
+        tankings = newTankings
+        notifyDataSetChanged()
+    }
 }

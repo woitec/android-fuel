@@ -7,4 +7,10 @@
     <string name="textAverageConsumption">12.09 L/100km</string>
     <string name="textAverageCostDescription">Average cost:</string>
     <string name="textAverageCost">30.25 zł/100km</string>
+    <string name="addTankingFuelType_hint">Fuel type</string>
+    <string name="addTankingAmount_hint">Amount in L</string>
+    <string name="addTankingKilometersBefore_hint">Kilometers before</string>
+    <string name="addTankingKilometersAfter_hint">Kilometers after</string>
+    <string name="addTankingPrice_hint">Fuel price per L</string>
+    <string name="addTankingSubmit_text">OK</string>
 </resources>
