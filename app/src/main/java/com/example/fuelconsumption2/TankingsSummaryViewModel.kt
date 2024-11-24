@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
 
 class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
@@ -34,19 +37,25 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     val tankings = mutableListOf<Tanking>()
 
     fun populateDefaults() {
-        val currentTimestamp = Instant.now().toEpochMilli()
-        val oneYearBeforeNowTimestamp = Instant.now().minus(1, ChronoUnit.YEARS).toEpochMilli()
+        val currentTimestamp = Instant.now()
+        val currentTimestampInMilli = currentTimestamp.toEpochMilli()
+        val oneYearBeforeNowTimestamp = currentTimestamp
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .minus(1, ChronoUnit.YEARS)
+            .atStartOfDay(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
 
         //get consumption and cost and calculate averages from db
-        val recentVehicleId: Int? = configurationRepository.getRecentVehicleId()
-
-        val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
-            recentVehicleId,
-            oneYearBeforeNowTimestamp,
-            currentTimestamp
-        )
-
         viewModelScope.launch {
+            val recentVehicleId = configurationRepository.getRecentVehicleId()
+            val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
+                recentVehicleId,
+                oneYearBeforeNowTimestamp,
+                currentTimestampInMilli
+            )
+
             visibleTankings.collect { tankings ->
                 val totalFuel = tankings.fold(0f) { acc, tanking ->
                     acc + (tanking.FuelAmount ?: 0f)
@@ -70,12 +79,12 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 _state.update {
                     it.copy(
                         visibleTankings = visibleTankings,
-                        currentDate = SteroidDate(currentTimestamp),
+                        currentDate = SteroidDate(currentTimestampInMilli),
                         averageConsumption = averageConsumption,
                         averageCost = averageCost,
                         currentVehicle = recentVehicleId,
                         historyFilterStart = SteroidDate(oneYearBeforeNowTimestamp),
-                        historyFilterEnd = SteroidDate(currentTimestamp)
+                        historyFilterEnd = SteroidDate(currentTimestampInMilli)
                     )
                 }
             }

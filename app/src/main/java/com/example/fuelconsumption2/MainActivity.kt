@@ -23,24 +23,21 @@ import com.example.fuelconsumption2.data.entities.Vehicle
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private val deleteDatabaseDevelopmentOnly = true
+    private val databaseName = "FuelConsumptionApp.db"
+    private lateinit var db: AppDatabase
 
-    private val db by lazy {
-        Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            "FuelConsumptionApp.db"
-        ).build()
-    }
-
-    private val tankingsSummaryViewModel by viewModels<TankingsSummaryViewModel>(
-        factoryProducer = {
-            object: ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    private val tankingsSummaryViewModel: TankingsSummaryViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                if(modelClass.isAssignableFrom(TankingsSummaryViewModel::class.java)) {
+                    @Suppress("UNCHECKED_CAST")
                     return TankingsSummaryViewModel(db) as T
                 }
+                throw IllegalArgumentException("ViewModel is not TankingsSummaryViewmodel class.")
             }
         }
-    )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +47,15 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        lifecycleScope.launch {
+            if(deleteDatabaseDevelopmentOnly) deleteDatabase(databaseName)
+            db = Room.databaseBuilder(
+                    applicationContext,
+                    AppDatabase::class.java,
+                    databaseName
+                ).build()
         }
 
         tankingsSummaryViewModel.populateDefaults()
@@ -71,32 +77,32 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        lifecycleScope.launch {
-            tankingsSummaryViewModel.events.collect { event ->
-                when (event) {
-                    is TankingEvent.showAddVehicleDialog -> TODO()
-                    is TankingEvent.hideAddVehicleDialog -> TODO()
-
-                    is TankingEvent.showAddTankingDialog -> TODO()
-                    is TankingEvent.hideAddTankingDialog -> TODO()
-                    is TankingEvent.SetAmount -> TODO()
-                    is TankingEvent.SetVehicle -> TODO()
-                    is TankingEvent.SetKilometersBefore -> TODO()
-                    is TankingEvent.SetKilometersAfter -> TODO()
-                    is TankingEvent.SetPrice -> TODO()
-                    is TankingEvent.SaveTanking -> TODO()
-
-                    is TankingEvent.showFilterDialog -> TODO()
-                    is TankingEvent.hideFilterDialog -> TODO()
-                    is TankingEvent.SetDefaultVehicle -> TODO()
-
-                    is TankingEvent.SetCurrentVehicle -> TODO()
-
-                    is TankingEvent.DeleteTanking -> TODO()
-                    is TankingEvent.EditTanking -> TODO()
-                }
-            }
-        }
+//        lifecycleScope.launch {
+//            tankingsSummaryViewModel.events.collect { event ->
+//                when (event) {
+//                    is TankingEvent.showAddVehicleDialog -> TODO()
+//                    is TankingEvent.hideAddVehicleDialog -> TODO()
+//
+//                    is TankingEvent.showAddTankingDialog -> TODO()
+//                    is TankingEvent.hideAddTankingDialog -> TODO()
+//                    is TankingEvent.SetAmount -> TODO()
+//                    is TankingEvent.SetVehicle -> TODO()
+//                    is TankingEvent.SetKilometersBefore -> TODO()
+//                    is TankingEvent.SetKilometersAfter -> TODO()
+//                    is TankingEvent.SetPrice -> TODO()
+//                    is TankingEvent.SaveTanking -> TODO()
+//
+//                    is TankingEvent.showFilterDialog -> TODO()
+//                    is TankingEvent.hideFilterDialog -> TODO()
+//                    is TankingEvent.SetDefaultVehicle -> TODO()
+//
+//                    is TankingEvent.SetCurrentVehicle -> TODO()
+//
+//                    is TankingEvent.DeleteTanking -> TODO()
+//                    is TankingEvent.EditTanking -> TODO()
+//                }
+//            }
+//        }
     }
 
     private fun showAddTankingPopup() {
