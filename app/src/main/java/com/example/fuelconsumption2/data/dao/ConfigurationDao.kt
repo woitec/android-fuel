@@ -7,5 +7,5 @@ import com.example.fuelconsumption2.data.entities.Configuration
 @Dao
 interface ConfigurationDao {
     @Query("SELECT * FROM configuration WHERE ConfigurationId = 0")
-    fun getConfiguration(): Configuration
+    suspend fun getConfiguration(): Configuration?
 }

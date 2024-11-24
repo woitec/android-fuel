@@ -5,11 +5,11 @@ import com.example.fuelconsumption2.data.dao.ConfigurationDao
 import com.example.fuelconsumption2.data.entities.Configuration
 
 class ConfigurationRepository(private val configurationDao: ConfigurationDao) {
-    fun getConfiguration(): Configuration {
+    suspend fun getConfiguration(): Configuration? {
         return configurationDao.getConfiguration()
     }
 
-    fun getRecentVehicleId(): Int? {
-        return configurationDao.getConfiguration().RecentVehicleId
+    suspend fun getRecentVehicleId(): Int? {
+        return configurationDao.getConfiguration()?.RecentVehicleId
     }
 }
