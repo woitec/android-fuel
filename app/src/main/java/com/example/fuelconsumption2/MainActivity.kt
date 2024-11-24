@@ -23,9 +23,14 @@ import com.example.fuelconsumption2.data.entities.Vehicle
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private val deleteDatabaseDevelopmentOnly = true
-    private val databaseName = "FuelConsumptionApp.db"
-    private lateinit var db: AppDatabase
+
+    private val db by lazy {
+        Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "FuelConsumptionApp.db"
+        ).build()
+    }
 
     private val tankingsSummaryViewModel: TankingsSummaryViewModel by viewModels {
         object : ViewModelProvider.Factory {
@@ -47,15 +52,6 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
-
-        lifecycleScope.launch {
-            if(deleteDatabaseDevelopmentOnly) deleteDatabase(databaseName)
-            db = Room.databaseBuilder(
-                    applicationContext,
-                    AppDatabase::class.java,
-                    databaseName
-                ).build()
         }
 
         tankingsSummaryViewModel.populateDefaults()

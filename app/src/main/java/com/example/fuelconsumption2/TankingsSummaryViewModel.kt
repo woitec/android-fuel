@@ -47,9 +47,8 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             .toInstant()
             .toEpochMilli()
 
-        //get consumption and cost and calculate averages from db
         viewModelScope.launch {
-            val recentVehicleId = configurationRepository.getRecentVehicleId()
+            val recentVehicleId: Int? = configurationRepository.getRecentVehicleId()
             val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
                 recentVehicleId,
                 oneYearBeforeNowTimestamp,
@@ -148,7 +147,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         return vehicleRepository.getAllVehiclesForAddingTanking()
     }
 
-    fun getRecentVehicleId(): Int? {
+    suspend fun getRecentVehicleId(): Int? {
         return configurationRepository.getRecentVehicleId()
     }
 }
