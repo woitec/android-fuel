@@ -32,17 +32,20 @@ class MainActivity : AppCompatActivity() {
         ).build()
     }
 
-    private val tankingsSummaryViewModel: TankingsSummaryViewModel by viewModels {
-        object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                if(modelClass.isAssignableFrom(TankingsSummaryViewModel::class.java)) {
-                    @Suppress("UNCHECKED_CAST")
-                    return TankingsSummaryViewModel(db) as T
+    private val tankingsSummaryViewModel by viewModels<TankingsSummaryViewModel>(
+        factoryProducer = {
+            object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    if (modelClass.isAssignableFrom(TankingsSummaryViewModel::class.java)) {
+                        @Suppress("UNCHECKED_CAST")
+                        return TankingsSummaryViewModel(db) as T
+                    }
+                    throw IllegalArgumentException("Unknown ViewModel class: $modelClass")
                 }
-                throw IllegalArgumentException("ViewModel is not TankingsSummaryViewmodel class.")
             }
         }
-    }
+    )
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
