@@ -11,7 +11,7 @@ import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 
-@Database(entities = [Vehicle::class, Tanking::class, Configuration::class], version = 1)
+@Database(entities = [Vehicle::class, Tanking::class, Configuration::class], version = 2)
 @TypeConverters(FuelTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun vehicleDao(): VehicleDao

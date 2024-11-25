@@ -157,7 +157,11 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
                 vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        val selectedVehicle = vehicles[position]
+                        val selectedVehicle = if (vehicles.isEmpty()) {
+                             Vehicle(VehicleId = -1, Name = "Vehicle -1 with null name", RegistryNumber = null, Kilometers = null, DefaultFuelType = null)
+                        } else {
+                            vehicles[position]
+                        }
                         updateAddVehiclePopupOnVehicleSelection(selectedVehicle, addTankingDialogView)
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -193,7 +197,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
         context.findViewById<EditText>(R.id.addTankingFuelType).setText(fuelTypeName)
 
-        context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers)
+        context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers?.toString() ?: "No km stored")
     }
 
     fun updateTankingsRecyclerView(eventData: List<Tanking>) {

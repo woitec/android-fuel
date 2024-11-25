@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity() {
             applicationContext,
             AppDatabase::class.java,
             "FuelConsumptionApp.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     private val tankingsSummaryViewModel by viewModels<TankingsSummaryViewModel>(
