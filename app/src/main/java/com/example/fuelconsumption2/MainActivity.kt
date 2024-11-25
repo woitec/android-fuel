@@ -22,6 +22,7 @@ import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.enums.FuelType
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -47,7 +48,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     )
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,92 +78,39 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {
+            tankingsSummaryViewModel.onEvent(TankingEvent.showAddTankingDialog)
+        }
+
         //TODO(">Handle all possible events below")
-//        lifecycleScope.launch {
-//            tankingsSummaryViewModel.events.collect { event ->
-//                when (event) {
-//                    is TankingEvent.showAddVehicleDialog -> TODO()
-//                    is TankingEvent.hideAddVehicleDialog -> TODO()
-//
-//                    is TankingEvent.showAddTankingDialog -> TODO()
-//                    is TankingEvent.hideAddTankingDialog -> TODO()
-//                    is TankingEvent.SetAmount -> TODO()
-//                    is TankingEvent.SetVehicle -> TODO()
-//                    is TankingEvent.SetKilometersBefore -> TODO()
-//                    is TankingEvent.SetKilometersAfter -> TODO()
-//                    is TankingEvent.SetPrice -> TODO()
-//                    is TankingEvent.SaveTanking -> TODO()
-//
-//                    is TankingEvent.showFilterDialog -> TODO()
-//                    is TankingEvent.hideFilterDialog -> TODO()
-//                    is TankingEvent.SetDefaultVehicle -> TODO()
-//
-//                    is TankingEvent.SetCurrentVehicle -> TODO()
-//
-//                    is TankingEvent.DeleteTanking -> TODO()
-//                    is TankingEvent.EditTanking -> TODO()
-//                }
-//            }
-//        }
-    }
-
-    private fun showAddTankingDialog() {
-        val addTankingDialogView = layoutInflater.inflate(R.layout.add_tanking, null)
-        val addTankingDialog = AlertDialog.Builder(this)
-            .setView(addTankingDialogView)
-            .setTitle("Input data")
-            .create()
-
-
-        val vehiclePick: Spinner = addTankingDialogView.findViewById(R.id.addTankingVehiclePick)
         lifecycleScope.launch {
-            val recentVehicleId = tankingsSummaryViewModel.getRecentVehicleId()
+            tankingsSummaryViewModel.events.collect { event ->
+                when (event) {
+                    is TankingEvent.showAddVehicleDialog -> TODO()
+                    is TankingEvent.hideAddVehicleDialog -> TODO()
 
-            tankingsSummaryViewModel.getAllVehiclesForAddingTanking().collect { vehicles ->
-                val vehicleNames = mutableListOf("No vehicle selected")
-                vehicleNames.addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
-
-                val vehiclePickAdapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_spinner_item, vehicleNames)
-                vehiclePickAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                vehiclePick.adapter = vehiclePickAdapter
-
-                vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        val selectedVehicle = vehicles[position]
-                        updateAddVehiclePopupOnVehicleSelection(selectedVehicle)
+                    is TankingEvent.showAddTankingDialog -> {
+                        //tankingsSummaryViewModel.state.isAddingTanking = true via VM fun using _state
+                        tankingsSummaryViewModel.showAddTankingDialog(this@MainActivity)
                     }
-                    override fun onNothingSelected(parent: AdapterView<*>) {
-                        // it will never happen because "No vehicle selected" is a hard-coded default selection
-                    }
-                }
-                if(recentVehicleId == null) {
-                    vehiclePick.setSelection(0)
-                } else {
-                    /*
-                        `recentVehicleId` is served by `ConfigurationRepository` and
-                        `vehicles` are served by `VehicleRepository`
-                        both using absolute indexes in `db` so they match 1:1
-                        TODO("Unit test that shit.")
-                    */
-                    vehiclePick.setSelection(recentVehicleId+1)
+                    is TankingEvent.hideAddTankingDialog -> TODO()
+                    is TankingEvent.SetAmount -> TODO()
+                    is TankingEvent.SetVehicle -> TODO()
+                    is TankingEvent.SetKilometersBefore -> TODO()
+                    is TankingEvent.SetKilometersAfter -> TODO()
+                    is TankingEvent.SetPrice -> TODO()
+                    is TankingEvent.SaveTanking -> TODO()
+
+                    is TankingEvent.showFilterDialog -> TODO()
+                    is TankingEvent.hideFilterDialog -> TODO()
+                    is TankingEvent.SetDefaultVehicle -> TODO()
+
+                    is TankingEvent.SetCurrentVehicle -> TODO()
+
+                    is TankingEvent.DeleteTanking -> TODO()
+                    is TankingEvent.EditTanking -> TODO()
                 }
             }
         }
-
-        addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-            //val selectedVehicle = vehiclePick.selectedItem as Vehicle
-            //val selectedVehicleId = selectedVehicle.VehicleId
-            //TODO(">Process the data into db and update UI - recycler, stats, all of these should be Flow so automatic")
-            addTankingDialog.dismiss()
-        }
-
-        addTankingDialog.show()
-    }
-
-    private fun updateAddVehiclePopupOnVehicleSelection(vehicle: Vehicle) {
-        val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
-        findViewById<EditText>(R.id.addTankingFuelType).setText(fuelTypeName)
-
-        findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers)
     }
 }
