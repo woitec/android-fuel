@@ -129,6 +129,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         tankings.addAll(eventData)
     }
 
+    //TANKINGS
     suspend fun insertTankings(vararg newTanking: Tanking) {
         viewModelScope.launch {
             tankingRepository.insertTanking(*newTanking)
@@ -139,6 +140,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         return tankingRepository.getAllTankings()
     }
 
+    //VEHICLES
     fun getVehicleById(vehicleId: Int): Flow<Vehicle> {
         return vehicleRepository.getVehicleById(vehicleId)
     }
@@ -147,6 +149,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         return vehicleRepository.getAllVehiclesForAddingTanking()
     }
 
+    //CONFIGURATION
     suspend fun getRecentVehicleId(): Int? {
         return configurationRepository.getRecentVehicleId()
     }

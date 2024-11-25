@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Spinner
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Vehicle
+import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -76,6 +78,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //TODO(">Handle all possible events below")
 //        lifecycleScope.launch {
 //            tankingsSummaryViewModel.events.collect { event ->
 //                when (event) {
@@ -104,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
-    private fun showAddTankingPopup() {
+    private fun showAddTankingDialog() {
         val addTankingDialogView = layoutInflater.inflate(R.layout.add_tanking, null)
         val addTankingDialog = AlertDialog.Builder(this)
             .setView(addTankingDialogView)
@@ -150,7 +153,7 @@ class MainActivity : AppCompatActivity() {
         addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
             //val selectedVehicle = vehiclePick.selectedItem as Vehicle
             //val selectedVehicleId = selectedVehicle.VehicleId
-
+            //TODO(">Process the data into db and update UI - recycler, stats, all of these should be Flow so automatic")
             addTankingDialog.dismiss()
         }
 
@@ -158,6 +161,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateAddVehiclePopupOnVehicleSelection(vehicle: Vehicle) {
-        //update fields in the popup: addTankingFuelType, addTankingKilometersBefore
+        val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
+        findViewById<EditText>(R.id.addTankingFuelType).setText(fuelTypeName)
+
+        findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers)
     }
 }
