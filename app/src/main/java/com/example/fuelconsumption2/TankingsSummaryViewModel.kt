@@ -148,6 +148,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             val recentVehicleId = getRecentVehicleId()
 
             getAllVehiclesForAddingTanking().collect { vehicles ->
+                var selectedVehicle = Vehicle(VehicleId = -1, Name = "Vehicle -1 with null name", RegistryNumber = null, Kilometers = null, DefaultFuelType = null)
                 val vehicleNames = mutableListOf("No vehicle selected")
                 vehicleNames.addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
 
@@ -157,7 +158,8 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
                 vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        val selectedVehicle = vehicles[position]
+                        if (vehicles.isNotEmpty()) selectedVehicle = vehicles[position]
+
                         updateAddVehiclePopupOnVehicleSelection(selectedVehicle, addTankingDialogView)
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) {
@@ -170,20 +172,23 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     /*
                         `recentVehicleId` is served by `ConfigurationRepository` and
                         `vehicles` are served by `VehicleRepository`
-                        both using absolute indexes in `db` so they match 1:1
+                        both using absolute indexes in `db`
+                        but I'm adding a placeholder vehicle so they match 1:1+1
                         TODO("Unit test that shit.")
                     */
                     vehiclePick.setSelection(recentVehicleId+1)
                 }
-            }
-        }
+                addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
+                    val selectedVehicleId = selectedVehicle.VehicleId
+                    //TODO(">Process the data into db and update UI - recycler, stats, all of these should be Flow so automatic")
+                    //add Tanking with vehicle id, fuel type, kilometers before, km after, amount and price; add timestamp and cost
 
-        addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-            //val selectedVehicle = vehiclePick.selectedItem as Vehicle
-            //val selectedVehicleId = selectedVehicle.VehicleId
-            //TODO(">Process the data into db and update UI - recycler, stats, all of these should be Flow so automatic")
-            onEvent(TankingEvent.hideAddTankingDialog)
-            //addTankingDialog.dismiss() - put this into hideAddTankingDialog
+                    val newTanking = Tanking()
+
+                    addTankingDialog.dismiss()
+                    onEvent(TankingEvent.hideAddTankingDialog)
+                }
+            }
         }
 
         addTankingDialog.show()
@@ -193,7 +198,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
         context.findViewById<EditText>(R.id.addTankingFuelType).setText(fuelTypeName)
 
-        context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers)
+        context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers?.toString() ?: "No km stored")
     }
 
     fun updateTankingsRecyclerView(eventData: List<Tanking>) {

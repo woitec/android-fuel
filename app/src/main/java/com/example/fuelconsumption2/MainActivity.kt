@@ -32,7 +32,9 @@ class MainActivity : AppCompatActivity() {
             applicationContext,
             AppDatabase::class.java,
             "FuelConsumptionApp.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 
     private val tankingsSummaryViewModel by viewModels<TankingsSummaryViewModel>(
@@ -93,7 +95,9 @@ class MainActivity : AppCompatActivity() {
                         //tankingsSummaryViewModel.state.isAddingTanking = true via VM fun using _state
                         tankingsSummaryViewModel.showAddTankingDialog(this@MainActivity)
                     }
-                    is TankingEvent.hideAddTankingDialog -> TODO()
+                    is TankingEvent.hideAddTankingDialog -> {
+
+                    }
                     is TankingEvent.SetAmount -> TODO()
                     is TankingEvent.SetVehicle -> TODO()
                     is TankingEvent.SetKilometersBefore -> TODO()
