@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
@@ -33,6 +34,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 
 class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
@@ -179,15 +181,50 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     vehiclePick.setSelection(recentVehicleId+1)
                 }
                 addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                    val selectedVehicleId = selectedVehicle.VehicleId
-                    //TODO(">Process the data into db and update UI - recycler, stats, all of these should be Flow so automatic")
-                    //add Tanking with vehicle id, fuel type, kilometers before, km after, amount and price; add timestamp and cost
+                    val fuelType = addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString()
+                    val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
+                    val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
+                    val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
+                    val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
 
-                    val newTanking = Tanking()
+                    if (kilometersBeforeText.isBlank() || kilometersAfterText.isBlank() ||
+                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelType.isBlank()) {
+                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    val kilometersBefore = kilometersBeforeText.toIntOrNull() ?: 0
+                    val kilometersAfter = kilometersAfterText.toIntOrNull() ?: 0
+                    val amountOfFuel = amountOfFuelText.toFloatOrNull() ?: 0f
+                    val price = priceText.toFloatOrNull() ?: 0f
+                    val cost = String.format(Locale.US, "%.2f", (price * amountOfFuel)).toFloat()
+                    val currentTimestamp = Instant.now().toEpochMilli()
+
+                    val newTanking = Tanking(
+                        TankingId = 0, // Room will auto-re-generate this ID
+                        VehicleId = selectedVehicle.VehicleId,
+                        KilometersBefore = kilometersBefore,
+                        KilometersAfter = kilometersAfter,
+                        FuelAmount = amountOfFuel,
+                        Timestamp = currentTimestamp,
+                        Price = price,
+                        FuelType = fuelType,
+                        Cost = cost
+                    )
+
+                    viewModelScope.launch {
+                        try {
+                            tankingRepository.insertTanking(newTanking)
+                            Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
 
                     addTankingDialog.dismiss()
                     onEvent(TankingEvent.hideAddTankingDialog)
                 }
+
             }
         }
 
