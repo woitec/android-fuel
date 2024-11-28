@@ -11,7 +11,6 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Tanking
@@ -30,9 +29,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 
@@ -48,8 +45,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     val tankings = mutableListOf<Tanking>()
 
-    //TODO(">Change the name to more descriptive: this function populates the table with records from the default time span of 1 year before from today's date")
-    fun populateDefaults() {
+    fun populateTankingsForLastYear() {
         val currentTimestamp = Instant.now()
         val currentTimestampInMilli = currentTimestamp.toEpochMilli()
         val oneYearBeforeNowTimestamp = currentTimestamp

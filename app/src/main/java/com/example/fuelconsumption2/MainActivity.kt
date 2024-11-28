@@ -1,15 +1,9 @@
 package com.example.fuelconsumption2
 
 import android.os.Bundle
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,9 +14,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
-import com.example.fuelconsumption2.data.entities.Vehicle
-import com.example.fuelconsumption2.enums.FuelType
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -61,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        tankingsSummaryViewModel.populateDefaults()
+        tankingsSummaryViewModel.populateTankingsForLastYear()
 
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter(tankingsSummaryViewModel.tankings)
         val tankingsView: RecyclerView = findViewById<RecyclerView?>(R.id.tankingsView).apply {
