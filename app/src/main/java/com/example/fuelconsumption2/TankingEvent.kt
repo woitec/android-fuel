@@ -10,11 +10,6 @@ sealed interface TankingEvent {
     //Adding tanking
     object showAddTankingDialog: TankingEvent
     object hideAddTankingDialog: TankingEvent
-    data class SetVehicle(val vehicleId: Int?): TankingEvent
-    data class SetAmount(val amount: Float?): TankingEvent
-    data class SetKilometersBefore(val kilometersBefore: Int?): TankingEvent
-    data class SetKilometersAfter(val kilometersAfter: Int?): TankingEvent
-    data class SetPrice(val price: Float?): TankingEvent
     object SaveTanking: TankingEvent
 
     //Filtering history

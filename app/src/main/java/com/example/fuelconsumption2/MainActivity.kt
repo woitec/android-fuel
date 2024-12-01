@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
+import com.example.fuelconsumption2.data.entities.Tanking
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -54,7 +56,7 @@ class MainActivity : AppCompatActivity() {
 
         tankingsSummaryViewModel.populateTankingsForLastYear()
 
-        val tankingsRecyclerAdapter = TankingsRecyclerAdapter(tankingsSummaryViewModel.tankings)
+        val tankingsRecyclerAdapter = TankingsRecyclerAdapter(mutableListOf<Tanking>())
         val tankingsView: RecyclerView = findViewById<RecyclerView?>(R.id.tankingsView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = tankingsRecyclerAdapter
@@ -63,9 +65,8 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             tankingsSummaryViewModel.state.collect { state ->
                 state.visibleTankings?.let { flow ->
-                    flow.collect { tankingsList ->
-                        tankingsSummaryViewModel.updateTankingsRecyclerView(tankingsList)
-                        tankingsRecyclerAdapter.notifyDataSetChanged()
+                    flow.collect { currentTankings ->
+                        tankingsRecyclerAdapter.updateTankings(currentTankings)
                     }
                 }
             }
@@ -86,14 +87,17 @@ class MainActivity : AppCompatActivity() {
                         //tankingsSummaryViewModel.state.isAddingTanking = true via VM fun using _state
                         tankingsSummaryViewModel.showAddTankingDialog(this@MainActivity)
                     }
-                    is TankingEvent.hideAddTankingDialog -> {
 
+                    is TankingEvent.hideAddTankingDialog -> {
+                        tankingsSummaryViewModel.state.collect { state ->
+                            state.visibleTankings?.let { flow ->
+                                flow.collect { currentTankings ->
+                                    tankingsRecyclerAdapter.updateTankings(currentTankings)
+                                }
+                            }
+                        }
                     }
-                    is TankingEvent.SetAmount -> TODO()
-                    is TankingEvent.SetVehicle -> TODO()
-                    is TankingEvent.SetKilometersBefore -> TODO()
-                    is TankingEvent.SetKilometersAfter -> TODO()
-                    is TankingEvent.SetPrice -> TODO()
+
                     is TankingEvent.SaveTanking -> TODO()
 
                     is TankingEvent.showFilterDialog -> TODO()

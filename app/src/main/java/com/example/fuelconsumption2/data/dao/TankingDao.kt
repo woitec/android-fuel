@@ -12,7 +12,7 @@ interface TankingDao {
     fun getTankingById(tankingId: Int): Tanking
 
     @Insert
-    fun insertTanking(vararg tanking: Tanking)
+    fun insertTankings(vararg tanking: Tanking)
 
     @Query("SELECT * FROM tanking")
     fun getAllTankings(): Flow<List<Tanking>>

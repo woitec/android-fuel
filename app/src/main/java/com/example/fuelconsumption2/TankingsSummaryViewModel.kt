@@ -18,6 +18,7 @@ import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
+import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,8 +43,6 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     private val _events = MutableSharedFlow<TankingEvent>()
     val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
-
-    val tankings = mutableListOf<Tanking>()
 
     fun populateTankingsForLastYear() {
         val currentTimestamp = Instant.now()
@@ -135,6 +134,12 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     //EVENTS
     fun showAddTankingDialog(context: Context) {
+        viewModelScope.launch {
+            _state.update { currentState ->
+                currentState.copy(isAddingTanking = true)
+            }
+        }
+
         val addTankingDialogView = LayoutInflater.from(context).inflate(R.layout.add_tanking, null)
         val addTankingDialog = AlertDialog.Builder(context)
             .setView(addTankingDialogView)
@@ -145,7 +150,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         viewModelScope.launch {
             val recentVehicleId = getRecentVehicleId()
 
-            getAllVehiclesForAddingTanking().collect { vehicles ->
+            vehicleRepository.getAllVehiclesForAddingTanking().collect { vehicles ->
                 var selectedVehicle = Vehicle(VehicleId = -1, Name = "Vehicle -1 with null name", RegistryNumber = null, Kilometers = null, DefaultFuelType = null)
                 val vehicleNames = mutableListOf("No vehicle selected")
                 vehicleNames.addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
@@ -164,6 +169,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                         // it will never happen because "No vehicle selected" is the hard-coded default selection
                     }
                 }
+
                 if(recentVehicleId == null) {
                     vehiclePick.setSelection(0)
                 } else {
@@ -176,15 +182,16 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     */
                     vehiclePick.setSelection(recentVehicleId+1)
                 }
+
                 addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                    val fuelType = addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString()
+                    val fuelType = FuelTypeConverter().toFuelType(addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString())
                     val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
                     val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
                     val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
                     val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
 
                     if (kilometersBeforeText.isBlank() || kilometersAfterText.isBlank() ||
-                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelType.isBlank()) {
+                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelType == null) {
                         Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
@@ -210,7 +217,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
                     viewModelScope.launch {
                         try {
-                            tankingRepository.insertTanking(newTanking)
+                            tankingRepository.insertTankings(newTanking)
                             Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -218,12 +225,15 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     }
 
                     addTankingDialog.dismiss()
+                    viewModelScope.launch {
+                        _state.update { currentState ->
+                            currentState.copy(isAddingTanking = false)
+                        }
+                    }
                     onEvent(TankingEvent.hideAddTankingDialog)
                 }
-
             }
         }
-
         addTankingDialog.show()
     }
 
@@ -234,15 +244,10 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers?.toString() ?: "No km stored")
     }
 
-    fun updateTankingsRecyclerView(eventData: List<Tanking>) {
-        tankings.clear()
-        tankings.addAll(eventData)
-    }
-
     //TANKINGS
     suspend fun insertTankings(vararg newTanking: Tanking) {
         viewModelScope.launch {
-            tankingRepository.insertTanking(*newTanking)
+            tankingRepository.insertTankings(*newTanking)
         }
     }
 
@@ -253,10 +258,6 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     //VEHICLES
     fun getVehicleById(vehicleId: Int): Flow<Vehicle> {
         return vehicleRepository.getVehicleById(vehicleId)
-    }
-
-    private fun getAllVehiclesForAddingTanking(): Flow<List<Vehicle>> {
-        return vehicleRepository.getAllVehiclesForAddingTanking()
     }
 
     //CONFIGURATION

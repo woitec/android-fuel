@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.fuelconsumption2.SteroidDate
+import com.example.fuelconsumption2.enums.FuelType
 
 @Entity (tableName = "tanking")
 data class Tanking (
@@ -14,7 +15,7 @@ data class Tanking (
     @ColumnInfo(name = "fuel_amount") val FuelAmount: Float?,
     @ColumnInfo(name = "timestamp") val Timestamp: Long?,
     @ColumnInfo(name = "price") val Price: Float?,
-    @ColumnInfo(name = "fuel_type") val FuelType: String?,
+    @ColumnInfo(name = "fuel_type") val FuelType: FuelType?,
     @ColumnInfo(name = "cost") val Cost: Float?
     ) {
     fun steroidDate(): SteroidDate? {

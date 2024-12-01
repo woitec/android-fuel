@@ -1,8 +1,5 @@
 package com.example.fuelconsumption2.data.repository
 
-import android.content.Context
-import androidx.room.Room
-import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.dao.TankingDao
 import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.Dispatchers
@@ -16,9 +13,9 @@ class TankingRepository(private val tankingDao: TankingDao) {
         }
     }
 
-    suspend fun insertTanking(vararg tanking: Tanking) {
+    suspend fun insertTankings(vararg tanking: Tanking) {
         withContext(Dispatchers.IO) {
-            tankingDao.insertTanking(*tanking)
+            tankingDao.insertTankings(*tanking)
         }
     }
 

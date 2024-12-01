@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fuelconsumption2.data.entities.Tanking
+import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 
 class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
@@ -38,7 +39,7 @@ class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.dateText.text = SteroidDate(tankings[position].Timestamp).displayDate()
         holder.timeText.text = SteroidDate(tankings[position].Timestamp).displayTime()
-        holder.fuelTypeText.text = tankings[position].FuelType
+        holder.fuelTypeText.text = FuelTypeConverter().fromFuelType(tankings[position].FuelType)
         holder.fuelAmountText.text = tankings[position].FuelAmount.toString()
         holder.priceText.text = tankings[position].Price.toString()
         holder.costText.text = tankings[position].Cost.toString()
