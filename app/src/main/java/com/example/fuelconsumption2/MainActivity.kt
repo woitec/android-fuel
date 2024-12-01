@@ -49,7 +49,6 @@ class MainActivity : AppCompatActivity() {
         }
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -69,15 +68,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            tankingsSummaryViewModel.state
-                .map { state -> state.visibleTankings }
-                .flatMapLatest { visibleTankingsFlow ->
-                    visibleTankingsFlow ?: flowOf(emptyList())
-                }
-                .collect { visibleTankings ->
+            tankingsSummaryViewModel.state.collect { state ->
+                state.visibleTankings?.collect {visibleTankings ->
                     tankingsRecyclerAdapter.updateTankings(visibleTankings)
                     Log.d("debug","MA:debug all tankings: $visibleTankings")
                 }
+            }
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {
