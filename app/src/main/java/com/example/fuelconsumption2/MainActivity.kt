@@ -1,6 +1,7 @@
 package com.example.fuelconsumption2
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            val startTime = System.currentTimeMillis()
             tankingsSummaryViewModel.state
                 .map { state -> state.visibleTankings}
                 .distinctUntilChanged()
@@ -77,6 +79,7 @@ class MainActivity : AppCompatActivity() {
                 .collect { currentTankings ->
                     tankingsRecyclerAdapter.updateTankings(currentTankings)
                 }
+            Log.d("Performance", "MA:72 Operation took ${System.currentTimeMillis() - startTime}ms")
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {

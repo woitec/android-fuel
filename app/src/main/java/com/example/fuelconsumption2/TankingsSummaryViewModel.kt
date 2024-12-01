@@ -1,6 +1,7 @@
 package com.example.fuelconsumption2
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -101,6 +102,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
         viewModelScope.launch {
+            val startTime = System.currentTimeMillis()
             val currentState = _state.value
             val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(currentState.currentVehicle, start, end)
             _state.update {
@@ -108,6 +110,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     visibleTankings = newVisibleTankings
                 )
             }
+            Log.d("Performance", "VM:105 Operation took ${System.currentTimeMillis() - startTime}ms")
         }
     }
 
@@ -248,6 +251,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     )
 
                     viewModelScope.launch {
+                        val startTime = System.currentTimeMillis()
                         try {
                             tankingRepository.insertTankings(newTanking)
                             Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
@@ -260,6 +264,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                                 currentState.copy(isAddingTanking = false)
                             }
                         }
+                        Log.d("Performance", "VM:252 Operation took ${System.currentTimeMillis() - startTime}ms")
                     }
                 }
             }
