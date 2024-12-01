@@ -4,7 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.example.fuelconsumption2.data.TankingDiffCallback
 import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 
@@ -47,7 +49,9 @@ class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView
     }
 
     fun updateTankings(newTankings: List<Tanking>) {
+        val diffCallback = TankingDiffCallback(tankings, newTankings)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         tankings = newTankings
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 }

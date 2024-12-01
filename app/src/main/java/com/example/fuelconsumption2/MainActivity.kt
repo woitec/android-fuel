@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         tankingsSummaryViewModel.populateTankingsForLastYear()
 
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter(mutableListOf<Tanking>())
-        val tankingsView: RecyclerView = findViewById<RecyclerView?>(R.id.tankingsView).apply {
+        findViewById<RecyclerView?>(R.id.tankingsView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = tankingsRecyclerAdapter
         }
