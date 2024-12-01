@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fuelconsumption2.data.AppDatabase
+import com.example.fuelconsumption2.data.entities.Configuration
 import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.repository.ConfigurationRepository
@@ -28,7 +29,10 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -58,6 +62,11 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             .toEpochMilli())
 
         viewModelScope.launch {
+            if(configurationRepository.isConfigurationEmpty()) {
+                val defaultConfiguration = Configuration(1, null, null)
+                configurationRepository.insertConfiguration(defaultConfiguration)
+            }
+
             val recentVehicleId: Int? = configurationRepository.getRecentVehicleId()
             val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
                 recentVehicleId,
@@ -102,15 +111,13 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
         viewModelScope.launch {
-            val startTime = System.currentTimeMillis()
-            val currentState = _state.value
-            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(currentState.currentVehicle, start, end)
+            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
+            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
             _state.update {
                 it.copy(
                     visibleTankings = newVisibleTankings
                 )
             }
-            Log.d("Performance", "VM:105 Operation took ${System.currentTimeMillis() - startTime}ms")
         }
     }
 
@@ -251,20 +258,37 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     )
 
                     viewModelScope.launch {
-                        val startTime = System.currentTimeMillis()
                         try {
                             tankingRepository.insertTankings(newTanking)
                             Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
                             addTankingDialog.dismiss()
+
+                            val currentTimestampForState = Instant.now()
+                            val currentSteroidDate = SteroidDate(currentTimestampForState.toEpochMilli())
+                            val oneYearBeforeNowSteroidDate = SteroidDate(currentTimestampForState
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                                .minus(1, ChronoUnit.YEARS)
+                                .atStartOfDay(ZoneId.systemDefault())
+                                .toInstant()
+                                .toEpochMilli())
+
+                            _state.update {
+                                it.copy(
+                                    currentDate = currentSteroidDate,
+                                    isAddingTanking = false,
+                                    historyFilterStart = oneYearBeforeNowSteroidDate,
+                                    historyFilterEnd = currentSteroidDate
+                                )
+                            }
+                            //Log.d("debug", "VM:debug historyFilterStart = oneYearBeforeNowSteroidDate = "+oneYearBeforeNowSteroidDate.getTimestamp()+", historyFilterEnd = currentSteroidDate = "+currentSteroidDate.getTimestamp())
+                            //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", tanking timestamp: "+currentTimestamp+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
                         } finally {
-                            _state.update { currentState ->
-                                updateVisibleTankingsWithAppliedHistoryFilters(currentState.historyFilterStart, currentState.historyFilterEnd)
-                                currentState.copy(isAddingTanking = false)
-                            }
+                            //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
+                            updateVisibleTankingsWithAppliedHistoryFilters(_state.value.historyFilterStart, _state.value.historyFilterEnd)
                         }
-                        Log.d("Performance", "VM:252 Operation took ${System.currentTimeMillis() - startTime}ms")
                     }
                 }
             }

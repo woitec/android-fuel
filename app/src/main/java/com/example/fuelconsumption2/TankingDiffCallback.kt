@@ -1,4 +1,4 @@
-package com.example.fuelconsumption2.data
+package com.example.fuelconsumption2
 
 import androidx.recyclerview.widget.DiffUtil
 import com.example.fuelconsumption2.data.entities.Tanking

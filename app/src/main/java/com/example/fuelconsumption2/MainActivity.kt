@@ -62,24 +62,22 @@ class MainActivity : AppCompatActivity() {
 
         tankingsSummaryViewModel.populateTankingsForLastYear()
 
-        val tankingsRecyclerAdapter = TankingsRecyclerAdapter(mutableListOf<Tanking>())
+        val tankingsRecyclerAdapter = TankingsRecyclerAdapter()
         findViewById<RecyclerView?>(R.id.tankingsView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = tankingsRecyclerAdapter
         }
 
         lifecycleScope.launch {
-            val startTime = System.currentTimeMillis()
             tankingsSummaryViewModel.state
-                .map { state -> state.visibleTankings}
-                .distinctUntilChanged()
+                .map { state -> state.visibleTankings }
                 .flatMapLatest { visibleTankingsFlow ->
-                    visibleTankingsFlow ?: flowOf(emptyList<Tanking>())
+                    visibleTankingsFlow ?: flowOf(emptyList())
                 }
-                .collect { currentTankings ->
-                    tankingsRecyclerAdapter.updateTankings(currentTankings)
+                .collect { visibleTankings ->
+                    tankingsRecyclerAdapter.updateTankings(visibleTankings)
+                    Log.d("debug","MA:debug all tankings: $visibleTankings")
                 }
-            Log.d("Performance", "MA:72 Operation took ${System.currentTimeMillis() - startTime}ms")
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {

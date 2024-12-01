@@ -26,13 +26,17 @@ class TankingRepository(private val tankingDao: TankingDao) {
     }
 
     fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: SteroidDate?, end: SteroidDate?): Flow<List<Tanking>> {
+        var nonNullVehicleId = -1
+        if(vehicleId !== null) {
+            nonNullVehicleId = vehicleId
+        }
         return if (start == null || end == null) {
             flowOf(emptyList())
         } else if (start.getTimestamp() == null || end.getTimestamp() == null) {
             flowOf(emptyList())
         } else {
             tankingDao.getAllTankingsInBetweenByVehicleId(
-                vehicleId,
+                nonNullVehicleId,
                 start.getTimestamp()!!,
                 end.getTimestamp()!!
             )
