@@ -11,6 +11,13 @@ class FuelTypeConverter {
 
     @TypeConverter
     fun toFuelType(value: String?): FuelType? {
-        return value?.let { FuelType.valueOf(it) }
+        return when {
+            value.isNullOrBlank() || value == "No fuel selected" -> null
+            else -> try {
+                FuelType.valueOf(value)
+            } catch (e: IllegalArgumentException) {
+                null
+            }
+        }
     }
 }

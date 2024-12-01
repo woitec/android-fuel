@@ -19,6 +19,7 @@ import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
+import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -146,7 +147,20 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             .setTitle("Input data")
             .create()
 
+        val fuelPick: Spinner = addTankingDialogView.findViewById(R.id.addTankingFuelType)
+        val fuelTypes = mutableListOf("No fuel selected").apply {
+            addAll(FuelType.entries.toTypedArray().map {
+                it.name
+            })
+        }
+        val fuelPickAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, fuelTypes)
+        fuelPickAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        fuelPick.adapter = fuelPickAdapter
+
+        fuelPick.setSelection(0) //Default to "No fuel selected"
+
         val vehiclePick: Spinner = addTankingDialogView.findViewById(R.id.addTankingVehiclePick)
+
         viewModelScope.launch {
             val recentVehicleId = getRecentVehicleId()
 
@@ -163,7 +177,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                         if (vehicles.isNotEmpty()) selectedVehicle = vehicles[position]
 
-                        updateAddVehiclePopupOnVehicleSelection(selectedVehicle, addTankingDialogView)
+                        updateAddVehiclePopupOnVehicleSelection(selectedVehicle, fuelTypes, addTankingDialogView)
                     }
                     override fun onNothingSelected(parent: AdapterView<*>) {
                         // it will never happen because "No vehicle selected" is the hard-coded default selection
@@ -184,14 +198,20 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 }
 
                 addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                    val fuelType = FuelTypeConverter().toFuelType(addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString())
+                    val fuelTypeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString()
+                    val fuelType: FuelType? = if (fuelTypeText == "No fuel selected") {
+                        Toast.makeText(context, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
+                        null
+                    } else {
+                        FuelTypeConverter().toFuelType(fuelTypeText)
+                    }
                     val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
                     val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
                     val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
                     val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
 
                     if (kilometersBeforeText.isBlank() || kilometersAfterText.isBlank() ||
-                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelType == null) {
+                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelTypeText.isBlank()) {
                         Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
@@ -237,9 +257,16 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         addTankingDialog.show()
     }
 
-    private fun updateAddVehiclePopupOnVehicleSelection(vehicle: Vehicle, context: View) {
+    private fun updateAddVehiclePopupOnVehicleSelection(vehicle: Vehicle, fuelTypes: MutableList<String>, context: View) {
         val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
-        context.findViewById<EditText>(R.id.addTankingFuelType).setText(fuelTypeName)
+        val position = fuelTypes.indexOf(fuelTypeName)
+        val fuelTypeSpinner = context.findViewById<Spinner>(R.id.addTankingFuelType)
+        if (position >= 0) {
+            fuelTypeSpinner.setSelection(position)
+        } else {
+            fuelTypeSpinner.setSelection(0)
+        }
+        //TODO("Unit test that shit. fuelTypes is passed hand-to-hand but the user may mess up the spinner somehow.")
 
         context.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(vehicle.Kilometers?.toString() ?: "No km stored")
     }
