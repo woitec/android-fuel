@@ -198,7 +198,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 }
 
                 addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                    val fuelTypeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingFuelType).text.toString()
+                    val fuelTypeText = fuelPick.selectedItem.toString()
                     val fuelType: FuelType? = if (fuelTypeText == "No fuel selected") {
                         Toast.makeText(context, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
                         null
