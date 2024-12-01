@@ -4,17 +4,16 @@ import com.example.fuelconsumption2.data.entities.Tanking
 
 sealed interface TankingEvent {
     //Adding vehicle
-    object showAddVehicleDialog: TankingEvent
-    object hideAddVehicleDialog: TankingEvent
+    object ShowAddVehicleDialog: TankingEvent
+    object HideAddVehicleDialog: TankingEvent
 
     //Adding tanking
-    object showAddTankingDialog: TankingEvent
-    object hideAddTankingDialog: TankingEvent
-    object SaveTanking: TankingEvent
+    object ShowAddTankingDialog: TankingEvent
+    object HideAddTankingDialog: TankingEvent
 
     //Filtering history
-    object showFilterDialog: TankingEvent
-    object hideFilterDialog: TankingEvent
+    object ShowFilterDialog: TankingEvent
+    object HideFilterDialog: TankingEvent
     data class SetDefaultVehicle(val vehicleId: Int?): TankingEvent
 
     //Change vehicle

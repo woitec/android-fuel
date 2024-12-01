@@ -100,7 +100,15 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     }
 
     fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
-
+        viewModelScope.launch {
+            val currentState = _state.value
+            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(currentState.currentVehicle, start, end)
+            _state.update {
+                it.copy(
+                    visibleTankings = newVisibleTankings
+                )
+            }
+        }
     }
 
     fun onEvent(event: TankingEvent) {
@@ -244,7 +252,6 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                             tankingRepository.insertTankings(newTanking)
                             Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
                             addTankingDialog.dismiss()
-                            onEvent(TankingEvent.hideAddTankingDialog)
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
                         } finally {

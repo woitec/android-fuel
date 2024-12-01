@@ -15,7 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.entities.Tanking
-import kotlinx.coroutines.async
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -44,6 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,45 +68,37 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            tankingsSummaryViewModel.state.collect { state ->
-                state.visibleTankings?.let { flow ->
-                    flow.collect { currentTankings ->
-                        tankingsRecyclerAdapter.updateTankings(currentTankings)
-                    }
+            tankingsSummaryViewModel.state
+                .map { state -> state.visibleTankings}
+                .distinctUntilChanged()
+                .flatMapLatest { visibleTankingsFlow ->
+                    visibleTankingsFlow ?: flowOf(emptyList<Tanking>())
                 }
-            }
+                .collect { currentTankings ->
+                    tankingsRecyclerAdapter.updateTankings(currentTankings)
+                }
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {
-            tankingsSummaryViewModel.onEvent(TankingEvent.showAddTankingDialog)
+            tankingsSummaryViewModel.onEvent(TankingEvent.ShowAddTankingDialog)
         }
 
         //TODO(">Handle all possible events below")
         lifecycleScope.launch {
             tankingsSummaryViewModel.events.collect { event ->
                 when (event) {
-                    is TankingEvent.showAddVehicleDialog -> TODO()
-                    is TankingEvent.hideAddVehicleDialog -> TODO()
+                    is TankingEvent.ShowAddVehicleDialog -> TODO()
+                    is TankingEvent.HideAddVehicleDialog -> TODO()
 
-                    is TankingEvent.showAddTankingDialog -> {
+                    is TankingEvent.ShowAddTankingDialog -> {
                         //tankingsSummaryViewModel.state.isAddingTanking = true via VM fun using _state
                         tankingsSummaryViewModel.showAddTankingDialog(this@MainActivity)
                     }
 
-                    is TankingEvent.hideAddTankingDialog -> {
-                        tankingsSummaryViewModel.state.collect { state ->
-                            state.visibleTankings?.let { flow ->
-                                flow.collect { currentTankings ->
-                                    tankingsRecyclerAdapter.updateTankings(currentTankings)
-                                }
-                            }
-                        }
-                    }
+                    is TankingEvent.HideAddTankingDialog -> TODO()
 
-                    is TankingEvent.SaveTanking -> TODO()
-
-                    is TankingEvent.showFilterDialog -> TODO()
-                    is TankingEvent.hideFilterDialog -> TODO()
+                    is TankingEvent.ShowFilterDialog -> TODO()
+                    is TankingEvent.HideFilterDialog -> TODO()
                     is TankingEvent.SetDefaultVehicle -> TODO()
 
                     is TankingEvent.SetCurrentVehicle -> TODO()
