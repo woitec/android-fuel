@@ -39,7 +39,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
     private val vehicleRepository = VehicleRepository(db.vehicleDao())
     private val configurationRepository = ConfigurationRepository(db.configurationDao())
-    private val _state = MutableStateFlow(TankingsSummaryState())
+    private val _state = MutableStateFlow(TankingsSummaryState.default())
     val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState())
 
     private val _events = MutableSharedFlow<TankingEvent>()
@@ -47,21 +47,21 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     fun populateTankingsForLastYear() {
         val currentTimestamp = Instant.now()
-        val currentTimestampInMilli = currentTimestamp.toEpochMilli()
-        val oneYearBeforeNowTimestamp = currentTimestamp
+        val currentSteroidDate = SteroidDate(currentTimestamp.toEpochMilli())
+        val oneYearBeforeNowSteroidDate = SteroidDate(currentTimestamp
             .atZone(ZoneId.systemDefault())
             .toLocalDate()
             .minus(1, ChronoUnit.YEARS)
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
-            .toEpochMilli()
+            .toEpochMilli())
 
         viewModelScope.launch {
             val recentVehicleId: Int? = configurationRepository.getRecentVehicleId()
             val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
                 recentVehicleId,
-                oneYearBeforeNowTimestamp,
-                currentTimestampInMilli
+                oneYearBeforeNowSteroidDate,
+                currentSteroidDate
             )
 
             visibleTankings.collect { tankings ->
@@ -87,16 +87,20 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 _state.update {
                     it.copy(
                         visibleTankings = visibleTankings,
-                        currentDate = SteroidDate(currentTimestampInMilli),
+                        currentDate = currentSteroidDate,
                         averageConsumption = averageConsumption,
                         averageCost = averageCost,
                         currentVehicle = recentVehicleId,
-                        historyFilterStart = SteroidDate(oneYearBeforeNowTimestamp),
-                        historyFilterEnd = SteroidDate(currentTimestampInMilli)
+                        historyFilterStart = oneYearBeforeNowSteroidDate,
+                        historyFilterEnd = currentSteroidDate
                     )
                 }
             }
         }
+    }
+
+    fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
+
     }
 
     fun onEvent(event: TankingEvent) {
@@ -239,18 +243,17 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                         try {
                             tankingRepository.insertTankings(newTanking)
                             Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
+                            addTankingDialog.dismiss()
+                            onEvent(TankingEvent.hideAddTankingDialog)
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
+                        } finally {
+                            _state.update { currentState ->
+                                updateVisibleTankingsWithAppliedHistoryFilters(currentState.historyFilterStart, currentState.historyFilterEnd)
+                                currentState.copy(isAddingTanking = false)
+                            }
                         }
                     }
-
-                    addTankingDialog.dismiss()
-                    viewModelScope.launch {
-                        _state.update { currentState ->
-                            currentState.copy(isAddingTanking = false)
-                        }
-                    }
-                    onEvent(TankingEvent.hideAddTankingDialog)
                 }
             }
         }
