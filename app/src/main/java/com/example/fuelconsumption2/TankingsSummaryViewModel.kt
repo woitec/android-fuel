@@ -74,7 +74,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 currentSteroidDate
             )
 
-            visibleTankings.collect { tankings ->
+            visibleTankings?.collect { tankings ->
                 val totalFuel = tankings.fold(0f) { acc, tanking ->
                     acc + (tanking.FuelAmount ?: 0f)
                 }
@@ -96,7 +96,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
                 _state.update {
                     it.copy(
-                        visibleTankings = visibleTankings,
+                        visibleTankings = MutableStateFlow(tankings),
                         currentDate = currentSteroidDate,
                         averageConsumption = averageConsumption,
                         averageCost = averageCost,
@@ -109,17 +109,20 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
-    fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
-        viewModelScope.launch {
-            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
-            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
-            _state.update {
-                it.copy(
-                    visibleTankings = newVisibleTankings
-                )
-            }
-        }
-    }
+//    fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
+//        viewModelScope.launch {
+//            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
+//            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+//            newVisibleTankings?.collect {
+//                _state.update {
+//                    it.copy(
+//                        visibleTankings = newVisibleTankings
+//                    )
+//                }
+//                Log.d("debug",":debug 2")
+//            }
+//        }
+//    }
 
     fun onEvent(event: TankingEvent) {
         viewModelScope.launch {
@@ -273,21 +276,22 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                                 .toInstant()
                                 .toEpochMilli())
 
-                            _state.update {
-                                it.copy(
-                                    currentDate = currentSteroidDate,
-                                    isAddingTanking = false,
-                                    historyFilterStart = oneYearBeforeNowSteroidDate,
-                                    historyFilterEnd = currentSteroidDate
-                                )
+                            tankingRepository.getAllTankingsInBetweenByVehicleId(selectedVehicle.VehicleId, oneYearBeforeNowSteroidDate, currentSteroidDate).collect { newVisibleTankings ->
+                                _state.update {
+                                    it.copy(
+                                        visibleTankings = MutableStateFlow(newVisibleTankings),
+                                        currentDate = currentSteroidDate,
+                                        isAddingTanking = false,
+                                        historyFilterStart = oneYearBeforeNowSteroidDate,
+                                        historyFilterEnd = currentSteroidDate
+                                    )
+                                }
+                                Log.d("debug",":debug 1")
                             }
                             //Log.d("debug", "VM:debug historyFilterStart = oneYearBeforeNowSteroidDate = "+oneYearBeforeNowSteroidDate.getTimestamp()+", historyFilterEnd = currentSteroidDate = "+currentSteroidDate.getTimestamp())
                             //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", tanking timestamp: "+currentTimestamp+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
                         } catch (e: Exception) {
                             Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
-                        } finally {
-                            //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
-                            updateVisibleTankingsWithAppliedHistoryFilters(_state.value.historyFilterStart, _state.value.historyFilterEnd)
                         }
                     }
                 }

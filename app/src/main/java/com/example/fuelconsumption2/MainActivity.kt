@@ -69,8 +69,9 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             tankingsSummaryViewModel.state.collect { state ->
-                state.visibleTankings?.collect {visibleTankings ->
+                state.visibleTankings?.collect { visibleTankings ->
                     tankingsRecyclerAdapter.updateTankings(visibleTankings)
+                    Log.d("debug",":debug 3")
                     Log.d("debug","MA:debug all tankings: $visibleTankings")
                 }
             }
