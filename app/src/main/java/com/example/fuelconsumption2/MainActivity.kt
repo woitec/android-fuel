@@ -1,6 +1,7 @@
 package com.example.fuelconsumption2
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             AppDatabase::class.java,
             "FuelConsumptionApp.db"
         )
-            .fallbackToDestructiveMigration()
+            .fallbackToDestructiveMigration() // TODO: nie podoba mi się
             .build()
     }
 
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     if (modelClass.isAssignableFrom(TankingsSummaryViewModel::class.java)) {
-                        @Suppress("UNCHECKED_CAST")
+                        @Suppress("UNCHECKED_CAST") // TODO: to mi się jeszcze bardziej nie podoba. Mam nadzieję, że jest jakiś sposób dependenc injection bez castowania
                         return TankingsSummaryViewModel(db) as T
                     }
                     throw IllegalArgumentException("Unknown ViewModel class: $modelClass")
@@ -89,13 +90,14 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     is TankingEvent.hideAddTankingDialog -> {
-                        tankingsSummaryViewModel.state.collect { state ->
-                            state.visibleTankings?.let { flow ->
-                                flow.collect { currentTankings ->
-                                    tankingsRecyclerAdapter.updateTankings(currentTankings)
-                                }
-                            }
-                        }
+                        // TODO: tutaj przychodzi pusta kolekcja i czyści poprzedni stan, po czym nic nie ma na UI
+//                        tankingsSummaryViewModel.state.collect { state ->
+//                            state.visibleTankings?.let { flow ->
+//                                flow.collect { currentTankings ->
+//                                    tankingsRecyclerAdapter.updateTankings(currentTankings)
+//                                }
+//                            }
+//                        }
                     }
 
                     is TankingEvent.SaveTanking -> TODO()

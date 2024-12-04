@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 
-class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
+class TankingsRecyclerAdapter(private var tankings: MutableList<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val dateText: TextView
         val timeText: TextView
@@ -47,7 +47,9 @@ class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView
     }
 
     fun updateTankings(newTankings: List<Tanking>) {
-        tankings = newTankings
+        // TODO: jak dodajesz tankowanie to postaraj się aktualzować tylko jeden rekord i robić notify tylko na elemencie o danym id, wtedy nie będzie rysować listy od nowa
+        tankings.clear()
+        tankings.addAll(newTankings)
         notifyDataSetChanged()
     }
 }

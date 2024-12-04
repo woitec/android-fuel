@@ -20,6 +20,7 @@ import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -39,11 +41,13 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
     private val vehicleRepository = VehicleRepository(db.vehicleDao())
     private val configurationRepository = ConfigurationRepository(db.configurationDao())
-    private val _state = MutableStateFlow(TankingsSummaryState())
-    val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState())
+    // TODO: tu trzeba pomyśleć czy nie lepiej w inny sposób pobrać tankowania. Po co rozdział na _state i state?
+    private val _state = MutableStateFlow(TankingsSummaryState(visibleTankings = getAllTankings()))
+    val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState(visibleTankings = getAllTankings()))
 
-    private val _events = MutableSharedFlow<TankingEvent>()
-    val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
+
+    private val _events = Channel<TankingEvent>()
+    val events: Flow<TankingEvent> = _events.receiveAsFlow()
 
     fun populateTankingsForLastYear() {
         val currentTimestamp = Instant.now()
@@ -101,7 +105,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
     fun onEvent(event: TankingEvent) {
         viewModelScope.launch {
-            _events.emit(event)
+            _events.send(event)
         }
     }
 
