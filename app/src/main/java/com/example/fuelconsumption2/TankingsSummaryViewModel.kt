@@ -278,10 +278,13 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                                 historyFilterEnd = currentTimestampForState.toEpochMilli()
                             )
                         }
-                        //Log.d("debug", "VM:debug historyFilterStart = oneYearBeforeNowSteroidDate = "+oneYearBeforeNowSteroidDate.getTimestamp()+", historyFilterEnd = currentSteroidDate = "+currentSteroidDate.getTimestamp())
-                        //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", tanking timestamp: "+currentTimestamp+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
                     } catch (e: Exception) {
                         Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
+                    } finally {
+                        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
+                        _state.update {
+                            it.copy(visibleTankings = currentTankings)
+                        }
                     }
                 }
             }

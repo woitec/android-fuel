@@ -42,7 +42,6 @@ class TankingsRecyclerAdapter: RecyclerView.Adapter<TankingsRecyclerAdapter.View
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val tanking = tankings[position]
-        Log.d("RecyclerBind", "RA:debug Binding tanking at position $position: $tanking")
         holder.dateText.text = SteroidDate(tanking.Timestamp).displayDate()
         holder.timeText.text = SteroidDate(tanking.Timestamp).displayTime()
         holder.fuelTypeText.text = FuelTypeConverter().fromFuelType(tanking.FuelType)
@@ -53,8 +52,6 @@ class TankingsRecyclerAdapter: RecyclerView.Adapter<TankingsRecyclerAdapter.View
     }
 
     fun updateTankings(newTankings: List<Tanking>) {
-        Log.d("RecyclerUpdate", "RA:debug Old tankings: $tankings")
-        Log.d("RecyclerUpdate", "RA:debug New tankings: $newTankings")
         val diffCallback = TankingDiffCallback(tankings, newTankings)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
         tankings = newTankings

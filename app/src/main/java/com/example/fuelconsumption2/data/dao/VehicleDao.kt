@@ -15,7 +15,7 @@ interface VehicleDao {
     fun getAllVehicles(): List<Vehicle>
 
     @Query("SELECT VehicleId, name, kilometers, default_fuel_type FROM vehicle")
-    fun getAllVehiclesForAddingTanking(): List<Vehicle>
+    suspend fun getAllVehiclesForAddingTanking(): List<Vehicle>
 
     @Insert
     fun insertVehicle(vararg vehicle: Vehicle)

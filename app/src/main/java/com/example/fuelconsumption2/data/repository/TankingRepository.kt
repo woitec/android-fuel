@@ -25,7 +25,7 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return tankingDao.getAllTankings()
     }
 
-    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
+    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
         var nonNullVehicleId = -1
         if(vehicleId !== null) {
             nonNullVehicleId = vehicleId
