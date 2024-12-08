@@ -1,6 +1,9 @@
 package com.example.fuelconsumption2
 
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 
@@ -26,4 +29,31 @@ class SteroidDate(private val timestamp: Long?) {
     fun getTimestamp(): Long? {
         return timestamp
     }
+
+    companion object {
+        fun oneYearBefore(time: Instant): SteroidDate {
+            return SteroidDate(time.atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .minus(1, ChronoUnit.YEARS)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli())
+        }
+    }
+
+    //TODO("Use companion objects to handle logic here")
+//    companion object {
+//        fun now(): SteroidDate {
+//            return SteroidDate(Instant.now().toEpochMilli())
+//        }
+//        fun oneYearBeforeNow(): SteroidDate {
+//            return SteroidDate(Instant.now()
+//                .atZone(ZoneId.systemDefault())
+//                .toLocalDate()
+//                .minus(1, ChronoUnit.YEARS)
+//                .atStartOfDay(ZoneId.systemDefault())
+//                .toInstant()
+//                .toEpochMilli())
+//        }
+//    }
 }

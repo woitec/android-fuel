@@ -1,14 +1,18 @@
 package com.example.fuelconsumption2
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 
-class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
+class TankingsRecyclerAdapter: RecyclerView.Adapter<TankingsRecyclerAdapter.ViewHolder>() {
+    private var tankings: List<Tanking> = emptyList()
+
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
         val dateText: TextView
         val timeText: TextView
@@ -37,17 +41,20 @@ class TankingsRecyclerAdapter(private var tankings: List<Tanking>): RecyclerView
     override fun getItemCount(): Int = tankings.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.dateText.text = SteroidDate(tankings[position].Timestamp).displayDate()
-        holder.timeText.text = SteroidDate(tankings[position].Timestamp).displayTime()
-        holder.fuelTypeText.text = FuelTypeConverter().fromFuelType(tankings[position].FuelType)
-        holder.fuelAmountText.text = tankings[position].FuelAmount.toString()
-        holder.priceText.text = tankings[position].Price.toString()
-        holder.costText.text = tankings[position].Cost.toString()
-        holder.kilometersDifferenceText.text = ((tankings[position].KilometersAfter ?: 0) - (tankings[position].KilometersBefore ?: 0)).toString()
+        val tanking = tankings[position]
+        holder.dateText.text = SteroidDate(tanking.Timestamp).displayDate()
+        holder.timeText.text = SteroidDate(tanking.Timestamp).displayTime()
+        holder.fuelTypeText.text = FuelTypeConverter().fromFuelType(tanking.FuelType)
+        holder.fuelAmountText.text = tanking.FuelAmount.toString()
+        holder.priceText.text = tanking.Price.toString()
+        holder.costText.text = tanking.Cost.toString()
+        holder.kilometersDifferenceText.text = ((tanking.KilometersAfter ?: 0) - (tanking.KilometersBefore ?: 0)).toString()
     }
 
     fun updateTankings(newTankings: List<Tanking>) {
+        val diffCallback = TankingDiffCallback(tankings, newTankings)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
         tankings = newTankings
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
     }
 }

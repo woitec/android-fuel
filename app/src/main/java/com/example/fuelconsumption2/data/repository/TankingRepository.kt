@@ -1,9 +1,11 @@
 package com.example.fuelconsumption2.data.repository
 
+import com.example.fuelconsumption2.SteroidDate
 import com.example.fuelconsumption2.data.dao.TankingDao
 import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 
 class TankingRepository(private val tankingDao: TankingDao) {
@@ -23,7 +25,20 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return tankingDao.getAllTankings()
     }
 
-    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long, end: Long): Flow<List<Tanking>> {
-        return tankingDao.getAllTankingsInBetweenByVehicleId(vehicleId, start, end)
+    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
+        var nonNullVehicleId = -1
+        if(vehicleId !== null) {
+            nonNullVehicleId = vehicleId
+        }
+        return if (start == null || end == null) {
+            emptyList()
+        } else {
+            tankingDao.getAllTankingsInBetweenByVehicleId(
+                nonNullVehicleId,
+                start,
+                end
+            )
+        }
+        //TODO("Unit test that shit. The non-null assertion must be always valid.")
     }
 }

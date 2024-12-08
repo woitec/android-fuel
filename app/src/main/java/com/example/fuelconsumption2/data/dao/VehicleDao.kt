@@ -12,10 +12,10 @@ interface VehicleDao {
     fun getVehicleById(vehicleId: Int): Flow<Vehicle>
 
     @Query("SELECT * FROM vehicle")
-    fun getAllVehicles(): Flow<List<Vehicle>>
+    fun getAllVehicles(): List<Vehicle>
 
     @Query("SELECT VehicleId, name, kilometers, default_fuel_type FROM vehicle")
-    fun getAllVehiclesForAddingTanking(): Flow<List<Vehicle>>
+    suspend fun getAllVehiclesForAddingTanking(): List<Vehicle>
 
     @Insert
     fun insertVehicle(vararg vehicle: Vehicle)
