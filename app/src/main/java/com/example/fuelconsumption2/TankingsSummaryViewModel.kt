@@ -1,7 +1,6 @@
 package com.example.fuelconsumption2
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.AdapterView
@@ -29,10 +28,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -44,22 +40,27 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
     private val vehicleRepository = VehicleRepository(db.vehicleDao())
     private val configurationRepository = ConfigurationRepository(db.configurationDao())
-    private val _state = MutableStateFlow(TankingsSummaryState.default())
+
+    private val _state = MutableStateFlow(TankingsSummaryState())
     val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState())
 
     private val _events = MutableSharedFlow<TankingEvent>()
     val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
 
-    fun populateTankingsForLastYear() {
+    fun initiateTankingsSummaryState() {
         val currentTimestamp = Instant.now()
-        val currentSteroidDate = SteroidDate(currentTimestamp.toEpochMilli())
-        val oneYearBeforeNowSteroidDate = SteroidDate(currentTimestamp
-            .atZone(ZoneId.systemDefault())
-            .toLocalDate()
-            .minus(1, ChronoUnit.YEARS)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli())
+
+        val historyStartFromStateOrInitial = if (_state.value.historyFilterEnd != null) {
+            _state.value.historyFilterEnd
+        } else {
+            SteroidDate.oneYearBefore(currentTimestamp).getTimestamp()
+        }
+
+        val historyEndFromStateOrInitial = if (_state.value.historyFilterStart != null) {
+            _state.value.historyFilterStart
+        } else {
+            SteroidDate(currentTimestamp.toEpochMilli()).getTimestamp()
+        }
 
         viewModelScope.launch {
             if(configurationRepository.isConfigurationEmpty()) {
@@ -68,58 +69,57 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             }
 
             val recentVehicleId: Int? = configurationRepository.getRecentVehicleId()
-            val visibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
+
+            val visibleTankingsFetched = tankingRepository.getAllTankingsInBetweenByVehicleId(
                 recentVehicleId,
-                oneYearBeforeNowSteroidDate,
-                currentSteroidDate
+                historyStartFromStateOrInitial,
+                historyEndFromStateOrInitial
             )
 
-            visibleTankings.collect { tankings ->
-                val totalFuel = tankings.fold(0f) { acc, tanking ->
-                    acc + (tanking.FuelAmount ?: 0f)
-                }
-
-                val kilometersBefore = tankings.firstOrNull()?.KilometersBefore ?: 0
-                val kilometersAfter = tankings.lastOrNull()?.KilometersAfter ?: 0
-                val totalKm = kilometersBefore - kilometersAfter
-
-                val totalCost = tankings.fold(0f) { acc, tanking ->
-                    acc + (tanking.Cost ?: 0f)
-                }
-                val averageCost = totalCost / totalKm * 100
-
-                val averageConsumption = if (totalKm > 0) {
-                    (totalFuel / totalKm) * 100
-                } else {
-                    0f
-                }
-
-                _state.update {
-                    it.copy(
-                        visibleTankings = visibleTankings,
-                        currentDate = currentSteroidDate,
-                        averageConsumption = averageConsumption,
-                        averageCost = averageCost,
-                        currentVehicle = recentVehicleId,
-                        historyFilterStart = oneYearBeforeNowSteroidDate,
-                        historyFilterEnd = currentSteroidDate
-                    )
-                }
+            val totalFuel = visibleTankingsFetched.fold(0f) { acc, tanking ->
+                acc + (tanking.FuelAmount ?: 0f)
             }
-        }
-    }
 
-    fun updateVisibleTankingsWithAppliedHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
-        viewModelScope.launch {
-            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
-            val newVisibleTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+            val kilometersBefore = visibleTankingsFetched.firstOrNull()?.KilometersBefore ?: 0
+            val kilometersAfter = visibleTankingsFetched.lastOrNull()?.KilometersAfter ?: 0
+            val totalKm = kilometersBefore - kilometersAfter
+
+            val totalCost = visibleTankingsFetched.fold(0f) { acc, tanking ->
+                acc + (tanking.Cost ?: 0f)
+            }
+            val averageCost = totalCost / totalKm * 100
+
+            val averageConsumption = if (totalKm > 0) {
+                (totalFuel / totalKm) * 100
+            } else {
+                0f
+            }
+
             _state.update {
                 it.copy(
-                    visibleTankings = newVisibleTankings
+                    visibleTankings = visibleTankingsFetched,
+                    currentDate = SteroidDate(currentTimestamp.toEpochMilli()),
+                    averageConsumption = averageConsumption,
+                    averageCost = averageCost,
+                    currentVehicle = recentVehicleId,
+                    historyFilterStart = historyStartFromStateOrInitial,
+                    historyFilterEnd = historyEndFromStateOrInitial
                 )
             }
         }
     }
+
+//    fun changeHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
+//        viewModelScope.launch {
+//            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
+//            _state.update {
+//                it.copy(
+//                    historyFilterStart = start,
+//                    historyFilterEnd = end
+//                )
+//            }
+//        }
+//    }
 
     fun onEvent(event: TankingEvent) {
         viewModelScope.launch {
@@ -186,109 +186,102 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         viewModelScope.launch {
             val recentVehicleId = getRecentVehicleId()
 
-            vehicleRepository.getAllVehiclesForAddingTanking().collect { vehicles ->
-                var selectedVehicle = Vehicle(VehicleId = -1, Name = "Vehicle -1 with null name", RegistryNumber = null, Kilometers = null, DefaultFuelType = null)
-                val vehicleNames = mutableListOf("No vehicle selected")
-                vehicleNames.addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
+            val vehicles = vehicleRepository.getAllVehiclesForAddingTanking()
 
-                val vehiclePickAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, vehicleNames)
-                vehiclePickAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                vehiclePick.adapter = vehiclePickAdapter
+            var selectedVehicle = Vehicle(VehicleId = -1, Name = "Vehicle -1 with null name", RegistryNumber = null, Kilometers = null, DefaultFuelType = null)
 
-                vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                        if (vehicles.isNotEmpty()) selectedVehicle = vehicles[position]
+            val vehicleNames = mutableListOf("No vehicle selected")
+            vehicleNames.addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
 
-                        updateAddVehiclePopupOnVehicleSelection(selectedVehicle, fuelTypes, addTankingDialogView)
-                    }
-                    override fun onNothingSelected(parent: AdapterView<*>) {
-                        // it will never happen because "No vehicle selected" is the hard-coded default selection
-                    }
+            val vehiclePickAdapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, vehicleNames)
+            vehiclePickAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            vehiclePick.adapter = vehiclePickAdapter
+
+            vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                    if (vehicles.isNotEmpty()) selectedVehicle = vehicles[position]
+
+                    updateAddVehiclePopupOnVehicleSelection(selectedVehicle, fuelTypes, addTankingDialogView)
                 }
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                    // it will never happen because "No vehicle selected" is the hard-coded default selection
+                }
+            }
 
-                if(recentVehicleId == null) {
-                    vehiclePick.setSelection(0)
+            if(recentVehicleId == null) {
+                vehiclePick.setSelection(0)
+            } else {
+                /*
+                    `recentVehicleId` is served by `ConfigurationRepository` and
+                    `vehicles` are served by `VehicleRepository`
+                    both using absolute indexes in `db`
+                    but I'm adding a placeholder vehicle so they match 1:1+1
+                    TODO("Unit test that shit.")
+                */
+                vehiclePick.setSelection(recentVehicleId+1)
+            }
+
+            addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
+                val fuelTypeText = fuelPick.selectedItem.toString()
+                val fuelType: FuelType? = if (fuelTypeText == "No fuel selected") {
+                    Toast.makeText(context, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
+                    null
                 } else {
-                    /*
-                        `recentVehicleId` is served by `ConfigurationRepository` and
-                        `vehicles` are served by `VehicleRepository`
-                        both using absolute indexes in `db`
-                        but I'm adding a placeholder vehicle so they match 1:1+1
-                        TODO("Unit test that shit.")
-                    */
-                    vehiclePick.setSelection(recentVehicleId+1)
+                    FuelTypeConverter().toFuelType(fuelTypeText)
+                }
+                val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
+                val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
+                val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
+                val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
+
+                if (kilometersBeforeText.isBlank() || kilometersAfterText.isBlank() ||
+                    amountOfFuelText.isBlank() || priceText.isBlank() || fuelTypeText.isBlank()) {
+                    Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
                 }
 
-                addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                    val fuelTypeText = fuelPick.selectedItem.toString()
-                    val fuelType: FuelType? = if (fuelTypeText == "No fuel selected") {
-                        Toast.makeText(context, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
-                        null
-                    } else {
-                        FuelTypeConverter().toFuelType(fuelTypeText)
-                    }
-                    val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
-                    val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
-                    val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
-                    val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
+                val kilometersBefore = kilometersBeforeText.toIntOrNull() ?: 0
+                val kilometersAfter = kilometersAfterText.toIntOrNull() ?: 0
+                val amountOfFuel = amountOfFuelText.toFloatOrNull() ?: 0f
+                val price = priceText.toFloatOrNull() ?: 0f
+                val cost = String.format(Locale.US, "%.2f", (price * amountOfFuel)).toFloat()
+                val currentTimestamp = Instant.now().toEpochMilli()
 
-                    if (kilometersBeforeText.isBlank() || kilometersAfterText.isBlank() ||
-                        amountOfFuelText.isBlank() || priceText.isBlank() || fuelTypeText.isBlank()) {
-                        Toast.makeText(context, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                        return@setOnClickListener
-                    }
+                val newTanking = Tanking(
+                    TankingId = 0, // Room will auto-re-generate this ID
+                    VehicleId = selectedVehicle.VehicleId,
+                    KilometersBefore = kilometersBefore,
+                    KilometersAfter = kilometersAfter,
+                    FuelAmount = amountOfFuel,
+                    Timestamp = currentTimestamp,
+                    Price = price,
+                    FuelType = fuelType,
+                    Cost = cost
+                )
 
-                    val kilometersBefore = kilometersBeforeText.toIntOrNull() ?: 0
-                    val kilometersAfter = kilometersAfterText.toIntOrNull() ?: 0
-                    val amountOfFuel = amountOfFuelText.toFloatOrNull() ?: 0f
-                    val price = priceText.toFloatOrNull() ?: 0f
-                    val cost = String.format(Locale.US, "%.2f", (price * amountOfFuel)).toFloat()
-                    val currentTimestamp = Instant.now().toEpochMilli()
+                viewModelScope.launch {
+                    try {
+                        tankingRepository.insertTankings(newTanking)
+                        Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
+                        addTankingDialog.dismiss()
 
-                    val newTanking = Tanking(
-                        TankingId = 0, // Room will auto-re-generate this ID
-                        VehicleId = selectedVehicle.VehicleId,
-                        KilometersBefore = kilometersBefore,
-                        KilometersAfter = kilometersAfter,
-                        FuelAmount = amountOfFuel,
-                        Timestamp = currentTimestamp,
-                        Price = price,
-                        FuelType = fuelType,
-                        Cost = cost
-                    )
+                        val currentTimestampForState = Instant.now()
+                        val currentSteroidDate = SteroidDate(currentTimestampForState.toEpochMilli())
+                        val oneYearBeforeNowTimestamp = SteroidDate.oneYearBefore(currentTimestampForState).getTimestamp()
 
-                    viewModelScope.launch {
-                        try {
-                            tankingRepository.insertTankings(newTanking)
-                            Toast.makeText(context, "Tanking added successfully", Toast.LENGTH_SHORT).show()
-                            addTankingDialog.dismiss()
-
-                            val currentTimestampForState = Instant.now()
-                            val currentSteroidDate = SteroidDate(currentTimestampForState.toEpochMilli())
-                            val oneYearBeforeNowSteroidDate = SteroidDate(currentTimestampForState
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDate()
-                                .minus(1, ChronoUnit.YEARS)
-                                .atStartOfDay(ZoneId.systemDefault())
-                                .toInstant()
-                                .toEpochMilli())
-
-                            _state.update {
-                                it.copy(
-                                    currentDate = currentSteroidDate,
-                                    isAddingTanking = false,
-                                    historyFilterStart = oneYearBeforeNowSteroidDate,
-                                    historyFilterEnd = currentSteroidDate
-                                )
-                            }
-                            //Log.d("debug", "VM:debug historyFilterStart = oneYearBeforeNowSteroidDate = "+oneYearBeforeNowSteroidDate.getTimestamp()+", historyFilterEnd = currentSteroidDate = "+currentSteroidDate.getTimestamp())
-                            //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", tanking timestamp: "+currentTimestamp+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
-                        } finally {
-                            //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
-                            updateVisibleTankingsWithAppliedHistoryFilters(_state.value.historyFilterStart, _state.value.historyFilterEnd)
+                        _state.update {
+                            it.copy(
+                                currentDate = currentSteroidDate,
+                                isAddingTanking = false,
+                                currentVehicle = selectedVehicle.VehicleId,
+                                historyFilterStart = oneYearBeforeNowTimestamp,
+                                historyFilterEnd = currentTimestampForState.toEpochMilli()
+                            )
                         }
+                        //Log.d("debug", "VM:debug historyFilterStart = oneYearBeforeNowSteroidDate = "+oneYearBeforeNowSteroidDate.getTimestamp()+", historyFilterEnd = currentSteroidDate = "+currentSteroidDate.getTimestamp())
+                        //Log.d("debug", "VM:debug historyFilterStart: "+_state.value.historyFilterStart?.getTimestamp()+", tanking timestamp: "+currentTimestamp+", historyFilterEnd: "+_state.value.historyFilterEnd?.getTimestamp())
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error adding Tanking: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

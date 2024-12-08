@@ -15,12 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.example.fuelconsumption2.data.AppDatabase
-import com.example.fuelconsumption2.data.entities.Tanking
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -59,7 +53,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        tankingsSummaryViewModel.populateTankingsForLastYear()
+        tankingsSummaryViewModel.initiateTankingsSummaryState()
 
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter()
         findViewById<RecyclerView?>(R.id.tankingsView).apply {
@@ -69,10 +63,7 @@ class MainActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             tankingsSummaryViewModel.state.collect { state ->
-                state.visibleTankings?.collect {visibleTankings ->
-                    tankingsRecyclerAdapter.updateTankings(visibleTankings)
-                    Log.d("debug","MA:debug all tankings: $visibleTankings")
-                }
+                tankingsRecyclerAdapter.updateTankings(state.visibleTankings)
             }
         }
 

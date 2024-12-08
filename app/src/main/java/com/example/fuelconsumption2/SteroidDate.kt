@@ -30,6 +30,17 @@ class SteroidDate(private val timestamp: Long?) {
         return timestamp
     }
 
+    companion object {
+        fun oneYearBefore(time: Instant): SteroidDate {
+            return SteroidDate(time.atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .minus(1, ChronoUnit.YEARS)
+                .atStartOfDay(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli())
+        }
+    }
+
     //TODO("Use companion objects to handle logic here")
 //    companion object {
 //        fun now(): SteroidDate {

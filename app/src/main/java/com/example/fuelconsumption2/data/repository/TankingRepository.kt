@@ -25,20 +25,18 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return tankingDao.getAllTankings()
     }
 
-    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: SteroidDate?, end: SteroidDate?): Flow<List<Tanking>> {
+    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
         var nonNullVehicleId = -1
         if(vehicleId !== null) {
             nonNullVehicleId = vehicleId
         }
         return if (start == null || end == null) {
-            flowOf(emptyList())
-        } else if (start.getTimestamp() == null || end.getTimestamp() == null) {
-            flowOf(emptyList())
+            emptyList()
         } else {
             tankingDao.getAllTankingsInBetweenByVehicleId(
                 nonNullVehicleId,
-                start.getTimestamp()!!,
-                end.getTimestamp()!!
+                start,
+                end
             )
         }
         //TODO("Unit test that shit. The non-null assertion must be always valid.")
