@@ -28,7 +28,6 @@ import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -66,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        tankingsSummaryViewModel.initiateTankingsSummaryState()
+        tankingsSummaryViewModel.initializeState()
 
         val tankingsRecyclerAdapter = TankingsRecyclerAdapter()
         findViewById<RecyclerView?>(R.id.tankingsView).apply {
