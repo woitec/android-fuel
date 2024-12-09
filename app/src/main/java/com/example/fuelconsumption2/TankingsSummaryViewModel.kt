@@ -32,9 +32,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.util.Locale
+import kotlin.math.tan
 
 class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val tankingRepository = TankingRepository(db.tankingDao())
@@ -109,51 +108,11 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
-//    fun changeHistoryFilters(start: SteroidDate?, end: SteroidDate?) {
-//        viewModelScope.launch {
-//            Log.d("debug", "VM:debug state currentVehicle: "+_state.value.currentVehicle)
-//            _state.update {
-//                it.copy(
-//                    historyFilterStart = start,
-//                    historyFilterEnd = end
-//                )
-//            }
-//        }
-//    }
-
     fun onEvent(event: TankingEvent) {
         viewModelScope.launch {
             _events.emit(event)
         }
     }
-
-//    fun updateTankings(
-//        visibleTankings: Flow<List<Tanking>>?,
-//        currentDate: SteroidDate?,
-//        averageConsumption: Float?,
-//        averageCost: Float?,
-//        isAddingVehicle: Boolean,
-//        isFilteringHistory: Boolean,
-//        isAddingTanking: Boolean,
-//        currentVehicle: Int?,
-//        historyFilterStart: SteroidDate?,
-//        historyFilterEnd: SteroidDate?
-//    ) {
-//        _state.update {
-//            it.copy(
-//                visibleTankings = visibleTankings,
-//                currentDate = currentDate,
-//                averageConsumption = averageConsumption,
-//                averageCost = averageCost,
-//                isAddingVehicle = isAddingVehicle,
-//                isFilteringHistory = isFilteringHistory,
-//                isAddingTanking = isAddingTanking,
-//                currentVehicle = currentVehicle,
-//                historyFilterStart = historyFilterStart,
-//                historyFilterEnd = historyFilterEnd
-//            )
-//        }
-//    }
 
     //EVENTS
     fun showAddTankingDialog(context: Context) {
@@ -201,7 +160,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                     if (vehicles.isNotEmpty()) selectedVehicle = vehicles[position]
 
-                    updateAddVehiclePopupOnVehicleSelection(selectedVehicle, fuelTypes, addTankingDialogView)
+                    updateAddTankingPopupOnVehicleSelection(selectedVehicle, fuelTypes, addTankingDialogView)
                 }
                 override fun onNothingSelected(parent: AdapterView<*>) {
                     // it will never happen because "No vehicle selected" is the hard-coded default selection
@@ -292,7 +251,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         addTankingDialog.show()
     }
 
-    private fun updateAddVehiclePopupOnVehicleSelection(vehicle: Vehicle, fuelTypes: MutableList<String>, context: View) {
+    private fun updateAddTankingPopupOnVehicleSelection(vehicle: Vehicle, fuelTypes: MutableList<String>, context: View) {
         val fuelTypeName = vehicle.DefaultFuelType?.name ?: "No fuel selected"
         val position = fuelTypes.indexOf(fuelTypeName)
         val fuelTypeSpinner = context.findViewById<Spinner>(R.id.addTankingFuelType)
@@ -313,6 +272,33 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
+    suspend fun insertTanking(tanking: Tanking) {
+        viewModelScope.launch {
+            tankingRepository.insertTankings(tanking)
+
+            val currentTimestampForState = Instant.now()
+            val currentSteroidDate = SteroidDate(currentTimestampForState.toEpochMilli())
+            val oneYearBeforeNowTimestamp = SteroidDate.oneYearBefore(currentTimestampForState).getTimestamp()
+
+            _state.update {
+                it.copy(
+                    currentDate = currentSteroidDate,
+                    isAddingTanking = false,
+                    currentVehicle = tanking.VehicleId,
+                    historyFilterStart = oneYearBeforeNowTimestamp,
+                    historyFilterEnd = currentTimestampForState.toEpochMilli()
+                )
+            }
+        }
+    }
+
+    suspend fun refreshVisibleTankings() {
+        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
+        _state.update {
+            it.copy(visibleTankings = currentTankings)
+        }
+    }
+
     fun getAllTankings(): Flow<List<Tanking>> {
         return tankingRepository.getAllTankings()
     }
@@ -322,8 +308,12 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         return vehicleRepository.getVehicleById(vehicleId)
     }
 
+    suspend fun getAllVehiclesForAddingTanking(): List<Vehicle> {
+        return vehicleRepository.getAllVehiclesForAddingTanking()
+    }
+
     //CONFIGURATION
-    private suspend fun getRecentVehicleId(): Int? {
+    suspend fun getRecentVehicleId(): Int? {
         return configurationRepository.getRecentVehicleId()
     }
 }

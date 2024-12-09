@@ -6,9 +6,9 @@ import com.example.fuelconsumption2.enums.FuelType
 
 @Entity (tableName = "vehicle")
 data class Vehicle (
-    @PrimaryKey(autoGenerate = true) val VehicleId: Int,
-    @ColumnInfo(name = "name") val Name: String?,
-    @ColumnInfo(name = "registry_number") val RegistryNumber: String?,
-    @ColumnInfo(name = "kilometers") val Kilometers: Int?,
-    @ColumnInfo(name = "default_fuel_type") val DefaultFuelType: FuelType?
+    @PrimaryKey(autoGenerate = true) val VehicleId: Int = -1,
+    @ColumnInfo(name = "name") val Name: String? = "Vehicle -1 with null name",
+    @ColumnInfo(name = "registry_number") val RegistryNumber: String? = null,
+    @ColumnInfo(name = "kilometers") val Kilometers: Int? = 0,
+    @ColumnInfo(name = "default_fuel_type") val DefaultFuelType: FuelType? = null
     )
