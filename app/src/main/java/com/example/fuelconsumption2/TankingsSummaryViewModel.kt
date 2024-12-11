@@ -74,12 +74,6 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     }
 
     //TANKINGS
-    suspend fun insertTankings(vararg newTanking: Tanking) {
-        viewModelScope.launch {
-            tankingRepository.insertTankings(*newTanking)
-        }
-    }
-
     suspend fun insertTanking(tanking: Tanking) {
         viewModelScope.launch {
             tankingRepository.insertTankings(tanking)
@@ -107,15 +101,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
-    fun getAllTankings(): Flow<List<Tanking>> {
-        return tankingRepository.getAllTankings()
-    }
-
     //VEHICLES
-    fun getVehicleById(vehicleId: Int): Flow<Vehicle> {
-        return vehicleRepository.getVehicleById(vehicleId)
-    }
-
     suspend fun getAllVehiclesForAddingTanking(): List<Vehicle> {
         return vehicleRepository.getAllVehiclesForAddingTanking()
     }
