@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +34,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val _events = MutableSharedFlow<TankingEvent>()
     val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
 
+    private val _currentTankings = MutableStateFlow<List<Tanking>>(emptyList())
+    val currentTankings: StateFlow<List<Tanking>> get() = _currentTankings
+
     fun initializeState() {
         val currentTimestamp = Instant.now()
         val historyStart = _state.value.historyFilterEnd ?: SteroidDate.oneYearBefore(currentTimestamp).getTimestamp()
@@ -44,18 +49,19 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             }
 
             val recentVehicleId = configurationRepository.getRecentVehicleId()
-            val visibleTankingsFetched = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
-            val totalFuel = visibleTankingsFetched.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
-            val kilometersBefore = visibleTankingsFetched.firstOrNull()?.KilometersBefore ?: 0
-            val kilometersAfter = visibleTankingsFetched.lastOrNull()?.KilometersAfter ?: 0
+
+            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
+
+            val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
+            val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
+            val kilometersAfter = _currentTankings.value.lastOrNull()?.KilometersAfter ?: 0
             val totalKm = kilometersBefore - kilometersAfter
-            val totalCost = visibleTankingsFetched.fold(0f) { acc, tanking -> acc + (tanking.Cost ?: 0f) }
+            val totalCost = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.Cost ?: 0f) }
             val averageCost = if (totalKm > 0) totalCost / totalKm * 100 else 0f
             val averageConsumption = if (totalKm > 0) (totalFuel / totalKm) * 100 else 0f
 
             _state.update {
                 it.copy(
-                    visibleTankings = visibleTankingsFetched,
                     currentDate = SteroidDate(currentTimestamp.toEpochMilli()),
                     averageConsumption = averageConsumption,
                     averageCost = averageCost,
@@ -94,12 +100,12 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
-    suspend fun refreshVisibleTankings() {
-        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
-        _state.update {
-            it.copy(visibleTankings = currentTankings)
-        }
-    }
+//    suspend fun refreshVisibleTankings() {
+//        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
+//        _state.update {
+//            it.copy(visibleTankings = currentTankings)
+//        }
+//    }
 
     //VEHICLES
     suspend fun getAllVehiclesForAddingTanking(): List<Vehicle> {

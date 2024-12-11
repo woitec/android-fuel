@@ -74,8 +74,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            tankingsSummaryViewModel.state.collect { state ->
-                tankingsRecyclerAdapter.updateTankings(state.visibleTankings)
+//            tankingsSummaryViewModel.state.collect { state ->
+//                tankingsRecyclerAdapter.updateTankings(state.visibleTankings)
+//            }
+            tankingsSummaryViewModel.currentTankings.collect { currentTankings ->
+                tankingsRecyclerAdapter.updateTankings(currentTankings)
             }
         }
 
@@ -200,7 +203,7 @@ class MainActivity : AppCompatActivity() {
                                             "Tanking added successfully",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        tankingsSummaryViewModel.refreshVisibleTankings()
+                                        //tankingsSummaryViewModel.refreshVisibleTankings()
                                     }
                                 }
                             }
