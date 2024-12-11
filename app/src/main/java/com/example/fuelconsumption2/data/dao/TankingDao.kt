@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @Dao
 interface TankingDao {
@@ -25,7 +27,7 @@ interface TankingDao {
     fun getAllFuelAmountsByVehicleId(vehicleId: Int): Flow<List<Float?>>
 
     @Query("SELECT * FROM tanking WHERE vehicle_id = :vehicleId AND timestamp BETWEEN :start AND :end")
-    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int, start: Long, end: Long): List<Tanking>
+    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int, start: Long, end: Long): Flow<List<Tanking>>
 
 //TODO("Change it to ByCurrentVehicle - from config table")
 }

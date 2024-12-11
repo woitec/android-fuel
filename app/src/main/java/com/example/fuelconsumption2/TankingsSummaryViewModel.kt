@@ -34,7 +34,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val _events = MutableSharedFlow<TankingEvent>()
     val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
 
-    private val _currentTankings = MutableStateFlow<List<Tanking>>(emptyList())
+    private var _currentTankings = MutableStateFlow<List<Tanking>>(emptyList())
     val currentTankings: StateFlow<List<Tanking>> get() = _currentTankings
 
     fun initializeState() {
@@ -50,7 +50,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
             val recentVehicleId = configurationRepository.getRecentVehicleId()
 
-            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
+            tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd).collect { data ->
+                _currentTankings.value = data
+            }
 
             val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
             val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0

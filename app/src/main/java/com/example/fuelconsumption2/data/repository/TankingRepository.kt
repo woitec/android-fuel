@@ -5,6 +5,8 @@ import com.example.fuelconsumption2.data.dao.TankingDao
 import com.example.fuelconsumption2.data.entities.Tanking
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
@@ -26,13 +28,13 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return tankingDao.getAllTankings()
     }
 
-    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
+    fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): Flow<List<Tanking>> {
         var nonNullVehicleId = -1
         if(vehicleId !== null) {
             nonNullVehicleId = vehicleId
         }
         return if (start == null || end == null) {
-            emptyList()
+            MutableStateFlow<List<Tanking>>(emptyList())
         } else {
             tankingDao.getAllTankingsInBetweenByVehicleId(
                 nonNullVehicleId,
