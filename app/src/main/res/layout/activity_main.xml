@@ -57,18 +57,110 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinnerVehicleModel" />
 
+    <LinearLayout
+        android:id="@+id/tankingsHeadings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/tankingsView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttonAddFuelConsumption">
+
+        <TextView
+            android:id="@+id/dateHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="5"
+            android:padding="2dp"
+            android:text="@string/headingDate"
+            android:textSize="10dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/timeHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="4"
+            android:padding="2dp"
+            android:text="@string/headingTime"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/fuelTypeHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="4"
+            android:padding="2dp"
+            android:text="@string/headingFuelType"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/fuelAmountHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingFuelAmount"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/priceHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingPrice"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/costHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingCost"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/kilometersDifferenceHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingKilometersDifference"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tankingsView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toTopOf="@+id/textAverageConsumptionDescription"
-        app:layout_constraintEnd_toEndOf="@id/textAverageConsumption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonAddVehicle" />
+        app:layout_constraintTop_toBottomOf="@+id/tankingsHeadings"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/textAverageConsumptionDescription"

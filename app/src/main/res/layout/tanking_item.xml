@@ -6,50 +6,71 @@
 
     <TextView
         android:id="@+id/date"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="5"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp"/>
 
     <TextView
         android:id="@+id/time"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="4"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 
     <TextView
         android:id="@+id/fuelType"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="4"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 
     <TextView
         android:id="@+id/fuelAmount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="3"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 
     <TextView
         android:id="@+id/price"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="3"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 
     <TextView
         android:id="@+id/cost"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="3"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 
     <TextView
         android:id="@+id/kilometersDifference"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:padding="2dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:text="" />
+        android:layout_weight="3"
+        android:text=""
+        android:layout_gravity="start"
+        android:textSize="10dp" />
 </LinearLayout>
