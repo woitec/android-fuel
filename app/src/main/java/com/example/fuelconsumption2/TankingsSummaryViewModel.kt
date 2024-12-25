@@ -54,6 +54,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
             _currentTankings.value = fetchedCurrentTankings
             calculateAverages(fetchedCurrentTankings)
+            Log.d("TEST", fetchedCurrentTankings.toString())
 
             val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
             val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
@@ -114,15 +115,19 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         var totalCost :Float = 0.0f
         var totalDistance :Float = 0.0f
 
+        Log.d("TEST", "calcAvg: "+tankings.toString())
+
         for(tanking in tankings) {
             totalFuel += tanking.FuelAmount ?: 0.0f
             totalCost += tanking.Cost ?: 0.0f
-            val distance = maxOf((tanking.KilometersBefore ?: 0) - (tanking.KilometersAfter ?: 0), 0)
+            val distance = maxOf((tanking.KilometersAfter ?: 0) - (tanking.KilometersBefore ?: 0), 0)
             totalDistance += distance
         }
 
         val averageConsumption = if (totalDistance > 0) (totalFuel/totalDistance) * 100 else 0.0f
         val averageCost = if (totalDistance > 0) (totalCost/totalDistance) * 100 else 0.0f
+
+        Log.d("TEST", "avgCons: " + averageConsumption + " avgCost: " + averageCost)
 
         _state.update {
             it.copy(
