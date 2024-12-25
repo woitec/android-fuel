@@ -1,5 +1,6 @@
 package com.example.fuelconsumption2
 
+import android.icu.text.DecimalFormat
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -45,9 +46,9 @@ class TankingsRecyclerAdapter: RecyclerView.Adapter<TankingsRecyclerAdapter.View
         holder.dateText.text = SteroidDate(tanking.Timestamp).displayDate()
         holder.timeText.text = SteroidDate(tanking.Timestamp).displayTime()
         holder.fuelTypeText.text = FuelTypeConverter().fromFuelType(tanking.FuelType)
-        holder.fuelAmountText.text = tanking.FuelAmount.toString()
-        holder.priceText.text = tanking.Price.toString()
-        holder.costText.text = tanking.Cost.toString()
+        holder.fuelAmountText.text = String.format("%.2f", tanking.FuelAmount)
+        holder.priceText.text = String.format("%.2f", tanking.Price)
+        holder.costText.text = String.format("%.2f", tanking.Cost)
         holder.kilometersDifferenceText.text = ((tanking.KilometersAfter ?: 0) - (tanking.KilometersBefore ?: 0)).toString()
     }
 
