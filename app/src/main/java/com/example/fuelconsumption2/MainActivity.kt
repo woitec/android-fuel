@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -82,6 +83,26 @@ class MainActivity : AppCompatActivity() {
                 .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
                 .collect { (start, end) ->
                     tankingsSummaryViewModel.updateCurrentTankings(start, end)
+                }
+        }
+
+        lifecycleScope.launch {
+            tankingsSummaryViewModel.state
+                .map { state -> state.averageConsumption }
+                .distinctUntilChanged()
+                .collect { averageConsumption ->
+                    val averageConsumptionView = findViewById<TextView>(R.id.textAverageConsumption)
+                    averageConsumptionView.text = String.format("%.2f L/100km", averageConsumption)
+                }
+        }
+
+        lifecycleScope.launch {
+            tankingsSummaryViewModel.state
+                .map { state -> state.averageCost }
+                .distinctUntilChanged()
+                .collect { averageCost ->
+                    val averageCostView = findViewById<TextView>(R.id.textAverageCost)
+                    averageCostView.text = String.format("%.2f zł/100km", averageCost)
                 }
         }
 
