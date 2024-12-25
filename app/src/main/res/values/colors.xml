@@ -2,4 +2,11 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="dark1">#192A3C</color><!-- Prussian Blue -->
+    <color name="dark2">#223546</color><!-- Gunmetal -->
+    <color name="dark3">#245B47</color><!-- Castleton Green-->
+    <color name="dark4">#224942</color><!-- Brunswick Green -->
+    <color name="dark5">#0D3A32</color><!-- Dark Green -->
+    <color name="light3">#6CD09C</color><!-- Stack Green -->
+    <color name="light2">#252627</color><!-- Stack Grey -->
 </resources>
