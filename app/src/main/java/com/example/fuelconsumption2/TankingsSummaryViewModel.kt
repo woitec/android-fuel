@@ -1,5 +1,6 @@
 package com.example.fuelconsumption2
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.fuelconsumption2.data.AppDatabase
@@ -50,9 +51,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
             val recentVehicleId = configurationRepository.getRecentVehicleId()
 
-            tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd).collect { data ->
-                _currentTankings.value = data
-            }
+            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
 
             val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
             val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
@@ -102,6 +101,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
+    suspend fun updateCurrentTankings(start: Long?, end: Long?) {
+            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+    }
 //    suspend fun refreshVisibleTankings() {
 //        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
 //        _state.update {

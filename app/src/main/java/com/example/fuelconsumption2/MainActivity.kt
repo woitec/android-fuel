@@ -26,6 +26,9 @@ import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.Instant
 
@@ -74,12 +77,19 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-//            tankingsSummaryViewModel.state.collect { state ->
-//                tankingsRecyclerAdapter.updateTankings(state.visibleTankings)
-//            }
+            tankingsSummaryViewModel.state
+                .map { state -> state.historyFilterStart to state.historyFilterEnd }
+                .distinctUntilChanged { old, new -> old.first == new.first && old.second == new.second }
+                .collect { (start, end) ->
+                    tankingsSummaryViewModel.updateCurrentTankings(start, end)
+                }
+        }
+
+        lifecycleScope.launch {
             tankingsSummaryViewModel.currentTankings.collect { currentTankings ->
                 tankingsRecyclerAdapter.updateTankings(currentTankings)
             }
+
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {
