@@ -15,8 +15,8 @@
     <string name="headingDate">Date</string>
     <string name="headingTime">Time</string>
     <string name="headingFuelType">Fuel</string>
-    <string name="headingFuelAmount">Amount</string>
-    <string name="headingPrice">Price</string>
-    <string name="headingCost">Cost</string>
+    <string name="headingFuelAmount">Amount(L)</string>
+    <string name="headingPrice">Price(zł/L)</string>
+    <string name="headingCost">Cost(zł)</string>
     <string name="headingKilometersDifference">Distance</string>
 </resources>

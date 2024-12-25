@@ -71,39 +71,6 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonAddFuelConsumption">
 
         <TextView
-            android:id="@+id/dateHeading"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="5"
-            android:padding="2dp"
-            android:text="@string/headingDate"
-            android:textSize="10dp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/timeHeading"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="4"
-            android:padding="2dp"
-            android:text="@string/headingTime"
-            android:textSize="10dp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/fuelTypeHeading"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="start"
-            android:layout_weight="4"
-            android:padding="2dp"
-            android:text="@string/headingFuelType"
-            android:textSize="10dp"
-            android:textStyle="bold" />
-
-        <TextView
             android:id="@+id/fuelAmountHeading"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -144,6 +111,39 @@
             android:layout_weight="3"
             android:padding="2dp"
             android:text="@string/headingKilometersDifference"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/fuelTypeHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingFuelType"
+            android:textSize="10dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/dateHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="4"
+            android:padding="2dp"
+            android:text="@string/headingDate"
+            android:textSize="10dp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/timeHeading"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_weight="3"
+            android:padding="2dp"
+            android:text="@string/headingTime"
             android:textSize="10dp"
             android:textStyle="bold" />
     </LinearLayout>
