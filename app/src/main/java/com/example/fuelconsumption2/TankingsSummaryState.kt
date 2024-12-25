@@ -10,7 +10,6 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 data class TankingsSummaryState(
-    val visibleTankings: List<Tanking> = emptyList<Tanking>(),
     val currentDate: SteroidDate? = null,
     val averageConsumption: Float? = 0.0f,
     val averageCost: Float? = 0.0f,
