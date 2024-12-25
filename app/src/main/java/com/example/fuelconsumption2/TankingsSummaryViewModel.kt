@@ -51,7 +51,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
             val recentVehicleId = configurationRepository.getRecentVehicleId()
 
-            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
+            val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
+            _currentTankings.value = fetchedCurrentTankings
+            calculateAverages(fetchedCurrentTankings)
 
             val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
             val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
@@ -102,7 +104,32 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     }
 
     suspend fun updateCurrentTankings(start: Long?, end: Long?) {
-            _currentTankings.value = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+        val newTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+        _currentTankings.value = newTankings
+        calculateAverages(newTankings)
+    }
+
+    private fun calculateAverages(tankings: List<Tanking>) {
+        var totalFuel :Float = 0.0f
+        var totalCost :Float = 0.0f
+        var totalDistance :Float = 0.0f
+
+        for(tanking in tankings) {
+            totalFuel += tanking.FuelAmount ?: 0.0f
+            totalCost += tanking.Cost ?: 0.0f
+            val distance = maxOf((tanking.KilometersBefore ?: 0) - (tanking.KilometersAfter ?: 0), 0)
+            totalDistance += distance
+        }
+
+        val averageConsumption = if (totalDistance > 0) (totalFuel/totalDistance) * 100 else 0.0f
+        val averageCost = if (totalDistance > 0) (totalCost/totalDistance) * 100 else 0.0f
+
+        _state.update {
+            it.copy(
+                averageConsumption = averageConsumption,
+                averageCost = averageCost
+            )
+        }
     }
 //    suspend fun refreshVisibleTankings() {
 //        val currentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, _state.value.historyFilterStart, _state.value.historyFilterEnd)
