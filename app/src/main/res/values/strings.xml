@@ -12,4 +12,11 @@
     <string name="addTankingKilometersAfter_hint">Kilometers after</string>
     <string name="addTankingPrice_hint">Fuel price per L</string>
     <string name="addTankingSubmit_text">OK</string>
+    <string name="headingDate">Date</string>
+    <string name="headingTime">Time</string>
+    <string name="headingFuelType">Fuel</string>
+    <string name="headingFuelAmount">Amount</string>
+    <string name="headingPrice">Price</string>
+    <string name="headingCost">Cost</string>
+    <string name="headingKilometersDifference">Distance</string>
 </resources>
