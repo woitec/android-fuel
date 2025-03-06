@@ -6,57 +6,81 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/filterStartDate"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/filerHistoryStartDateLayout"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:hint="@string/filterHistoryStartDate_hint"
-        android:inputType="datetime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/filterStartDateLabel"
-        android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/filterHistoryOptional"
-        android:textColor="#999"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterStartDate" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/filterStartDatePick"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/filterHistoryStartDate_hint"
+            android:inputType="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <EditText
-        android:id="@+id/filterEndDate"
+        <TextView
+            android:id="@+id/filterStartDateLabel"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/filterHistoryOptional"
+            android:textColor="#999"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/filterStartDatePick" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/filerHistoryEndDateLayout"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:hint="@string/filterHistoryEndDate_hint"
-        android:inputType="datetime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterStartDateLabel" />
+        app:layout_constraintTop_toBottomOf="@+id/filerHistoryStartDateLayout">
 
-    <TextView
-        android:id="@+id/filterEndDateLabel"
-        android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="@string/filterHistoryOptional"
-        android:textColor="#999"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterEndDate" />
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/filterEndDatePick"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            android:hint="@string/filterHistoryEndDate_hint"
+            android:inputType="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/filterEndDateLabel"
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/filterHistoryOptional"
+            android:textColor="#999"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/filterStartDatePick" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filterHistoryFuelType"
@@ -67,7 +91,7 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/filterEndDateLabel"
+        app:layout_constraintTop_toBottomOf="@+id/filerHistoryEndDateLayout"
         app:singleSelection="false"
         />
 
