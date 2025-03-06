@@ -1,6 +1,8 @@
 package com.example.fuelconsumption2
 
+import android.app.DatePickerDialog
 import android.content.Intent
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -331,6 +333,23 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             chipGroup.addView(chip)
+        }
+        //TODO("text size in picker or picker size, minimum 1 chip selected, applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
+
+        val startDatePicker = filterHistoryDialogView.findViewById<EditText>(R.id.filterStartDatePick)
+        startDatePicker.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val datePicker = DatePickerDialog(
+                this,
+                {_, year, month, dayOfMonth ->
+                    val selectedDate = String.format("%02d-%02d-%04d", dayOfMonth, month + 1, year)
+                    startDatePicker.setText(selectedDate)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            )
+            datePicker.show()
         }
 
         filterHistoryDialog.show()
