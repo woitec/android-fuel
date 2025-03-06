@@ -1,5 +1,6 @@
 package com.example.fuelconsumption2
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,7 +29,6 @@ import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -68,6 +68,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val act = AppCompatActivity()
+        val intent = Intent(this, act::class.java)
 
         tankingsSummaryViewModel.initializeState()
 
@@ -117,6 +119,10 @@ class MainActivity : AppCompatActivity() {
             tankingsSummaryViewModel.onEvent(TankingEvent.ShowAddTankingDialog)
         }
 
+        findViewById<Button>(R.id.buttonAddVehicle).setOnClickListener {
+            tankingsSummaryViewModel.onEvent(TankingEvent.ShowAddTankingDialog)
+        }
+
         //TODO(">Handle all possible events below")
         lifecycleScope.launch {
             tankingsSummaryViewModel.events.collect { event ->
@@ -125,7 +131,7 @@ class MainActivity : AppCompatActivity() {
                     is TankingEvent.HideAddVehicleDialog -> TODO()
 
                     is TankingEvent.ShowAddTankingDialog -> {
-                        val addTankingDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.add_tanking, null)
+                        val addTankingDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.add_tanking_dialog, null)
                         val addTankingDialog = AlertDialog.Builder(this@MainActivity)
                             .setView(addTankingDialogView)
                             .setTitle("Add tanking")
