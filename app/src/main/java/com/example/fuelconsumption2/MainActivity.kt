@@ -123,14 +123,16 @@ class MainActivity : AppCompatActivity() {
             tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.ShowAddVehicleDialog)
         }
 
+        findViewById<Button>(R.id.buttonFilterHistory).setOnClickListener {
+            tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.ShowFilterDialog)
+        }
         //TODO(">Handle all possible events below")
         lifecycleScope.launch {
             tankingsSummaryViewModel.events.collect { event ->
                 when (event) {
                     is TankingsSummaryEvent.ShowAddVehicleDialog -> showAddVehicleDialog()
                     is TankingsSummaryEvent.ShowAddTankingDialog -> showAddTankingDialog()
-                    is TankingsSummaryEvent.ShowFilterDialog -> TODO()
-                    is TankingsSummaryEvent.HideFilterDialog -> TODO()
+                    is TankingsSummaryEvent.ShowFilterDialog -> showFilterDialog()
                     is TankingsSummaryEvent.SetDefaultVehicle -> TODO()
                     is TankingsSummaryEvent.SetCurrentVehicle -> TODO()
                     is TankingsSummaryEvent.DeleteTanking -> TODO()
@@ -293,5 +295,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
         addTankingDialog.show()
+    }
+
+    private fun showFilterDialog() {
+        val filterHistoryDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.filter_history, null)
+        val filterHistoryDialog = AlertDialog.Builder(this@MainActivity)
+            .setView(filterHistoryDialogView)
+            .setTitle("Filter history")
+            .setPositiveButton("Apply") { dialog, _ ->
+                handleFilterHistorySubmit(filterHistoryDialogView)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+
+        filterHistoryDialog.show()
+    }
+
+    private fun handleFilterHistorySubmit(view: View) {
+
     }
 }

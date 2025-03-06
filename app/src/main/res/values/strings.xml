@@ -23,4 +23,8 @@
     <string name="addVehicleRegistryNumber_hint">Registry number</string>
     <string name="addVehicleKilometers_hint">Current kilometers</string>
     <string name="addVehicleSubmit_text">Add</string>
+    <string name="filterHistoryOptional">* optional</string>
+    <string name="filterHistoryStartDate_hint">Select start date</string>
+    <string name="filterHistoryEndDate_hint">Select end date</string>
+    <string name="filterHistoryFuelTypeLabel">* must select at least 1</string>
 </resources>

@@ -11,7 +11,6 @@ sealed interface TankingsSummaryEvent {
 
     //Filtering history
     object ShowFilterDialog: TankingsSummaryEvent
-    object HideFilterDialog: TankingsSummaryEvent
     data class SetDefaultVehicle(val vehicleId: Int?): TankingsSummaryEvent
 
     //Change vehicle
