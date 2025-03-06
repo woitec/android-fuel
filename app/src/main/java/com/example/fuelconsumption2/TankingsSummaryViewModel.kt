@@ -10,15 +10,13 @@ import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
-import kotlinx.coroutines.flow.Flow
+import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,8 +30,8 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     private val _state = MutableStateFlow(TankingsSummaryState())
     val state: StateFlow<TankingsSummaryState> = _state.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), TankingsSummaryState())
 
-    private val _events = MutableSharedFlow<TankingEvent>()
-    val events: SharedFlow<TankingEvent> = _events.asSharedFlow()
+    private val _events = MutableSharedFlow<TankingsSummaryEvent>()
+    val events: SharedFlow<TankingsSummaryEvent> = _events.asSharedFlow()
 
     private var _currentTankings = MutableStateFlow<List<Tanking>>(emptyList())
     val currentTankings: StateFlow<List<Tanking>> get() = _currentTankings
@@ -77,7 +75,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         }
     }
 
-    fun onEvent(event: TankingEvent) {
+    fun onEvent(event: TankingsSummaryEvent) {
         viewModelScope.launch {
             _events.emit(event)
         }
@@ -146,5 +144,12 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     //VEHICLES
     suspend fun getAllVehiclesForAddingTanking(): List<Vehicle> {
         return vehicleRepository.getAllVehiclesForAddingTanking()
+    }
+
+    fun addVehicle(name: String, registry: String, kilometers: String, defaultFuel: String) {
+        val kilometersInt = kilometers.toIntOrNull()
+        val defaultFuelAsType = FuelTypeConverter().toFuelType(defaultFuel)
+        val newVehicle = Vehicle(0, name, registry, kilometersInt, defaultFuelAsType)
+        vehicleRepository.insertVehicle(newVehicle)
     }
 }

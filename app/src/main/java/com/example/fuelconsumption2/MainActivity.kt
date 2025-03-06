@@ -116,150 +116,182 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.buttonAddFuelConsumption).setOnClickListener {
-            tankingsSummaryViewModel.onEvent(TankingEvent.ShowAddTankingDialog)
+            tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.ShowAddTankingDialog)
         }
 
         findViewById<Button>(R.id.buttonAddVehicle).setOnClickListener {
-            tankingsSummaryViewModel.onEvent(TankingEvent.ShowAddTankingDialog)
+            tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.ShowAddVehicleDialog)
         }
 
         //TODO(">Handle all possible events below")
         lifecycleScope.launch {
             tankingsSummaryViewModel.events.collect { event ->
                 when (event) {
-                    is TankingEvent.ShowAddVehicleDialog -> TODO()
-                    is TankingEvent.HideAddVehicleDialog -> TODO()
-
-                    is TankingEvent.ShowAddTankingDialog -> {
-                        val addTankingDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.add_tanking_dialog, null)
-                        val addTankingDialog = AlertDialog.Builder(this@MainActivity)
-                            .setView(addTankingDialogView)
-                            .setTitle("Add tanking")
-                            .create()
-
-                        val fuelPick: Spinner = addTankingDialogView.findViewById(R.id.addTankingFuelType)
-                        val fuelTypes = mutableListOf("No fuel selected").apply {
-                            addAll(FuelType.entries.toTypedArray().map {
-                                it.name
-                            })
-                        }
-                        fuelPick.adapter = ArrayAdapter(
-                            this@MainActivity,
-                            android.R.layout.simple_spinner_item,
-                            fuelTypes
-                        ).apply {
-                            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                        }
-                        fuelPick.setSelection(0) //Default to "No fuel selected"
-
-                        val vehiclePick: Spinner = addTankingDialogView.findViewById(R.id.addTankingVehiclePick)
-
-                        lifecycleScope.launch {
-                            val recentVehicleId = tankingsSummaryViewModel.state.value.currentVehicle
-
-                            val vehicles = tankingsSummaryViewModel.getAllVehiclesForAddingTanking()
-
-                            val vehicleNames = mutableListOf("No vehicle selected").apply {
-                                addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
-                            }
-
-                            vehiclePick.adapter = ArrayAdapter(
-                                this@MainActivity,
-                                android.R.layout.simple_spinner_item,
-                                vehicleNames
-                            ).apply {
-                                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                            }
-
-                            var selectedVehicle = Vehicle()
-                            vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
-                                override fun onItemSelected(parent: AdapterView<*>, view: View, vehiclePosition: Int, id: Long) {
-                                    if (vehicles.isNotEmpty()) selectedVehicle = vehicles[vehiclePosition]
-                                    val fuelTypeName = selectedVehicle.DefaultFuelType?.name ?: "No fuel selected"
-                                    fuelPick.setSelection(fuelTypes.indexOf(fuelTypeName).coerceAtLeast(0))
-                                    //TODO("Unit test that shit. fuelTypes is passed hand-to-hand but the user may mess up the spinner somehow.")
-
-                                    val kilometersBefore = selectedVehicle.Kilometers?.toString() ?: "No km stored"
-                                    addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(kilometersBefore)
-                                }
-                                override fun onNothingSelected(parent: AdapterView<*>) {}
-                            }
-
-                            /*
-                                `recentVehicleId` is served by `ConfigurationRepository` and
-                                `vehicles` are served by `VehicleRepository`
-                                both using absolute indexes in `db`
-                                but I'm adding a placeholder vehicle so they match 1:1+1
-                                TODO("Unit test that shit.")
-                            */
-                            vehiclePick.setSelection((recentVehicleId?.plus(1)) ?: 0)
-
-                            addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
-                                val fuelTypeText = fuelPick.selectedItem.toString()
-                                val fuelType = if (fuelTypeText == "No fuel selected") {
-                                    Toast.makeText(this@MainActivity, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
-                                    null
-                                } else {
-                                    FuelTypeConverter().toFuelType(fuelTypeText)
-                                }
-                                val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
-                                val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
-                                val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
-                                val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
-
-                                if (listOf(kilometersBeforeText, kilometersAfterText, amountOfFuelText, priceText, fuelTypeText).any { it.isBlank() }) {
-                                    Toast.makeText(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                                    return@setOnClickListener
-                                }
-
-                                val newTanking = Tanking(
-                                    TankingId = 0, // Room will auto-re-generate this ID
-                                    VehicleId = selectedVehicle.VehicleId,
-                                    KilometersBefore = kilometersBeforeText.toIntOrNull() ?: 0,
-                                    KilometersAfter = kilometersAfterText.toIntOrNull() ?: 0,
-                                    FuelAmount = amountOfFuelText.toFloatOrNull() ?: 0f,
-                                    Timestamp = Instant.now().toEpochMilli(),
-                                    Price = priceText.toFloatOrNull() ?: 0f,
-                                    FuelType = fuelType,
-                                    Cost = (priceText.toFloatOrNull() ?: 0f) * (amountOfFuelText.toFloatOrNull() ?: 0f)
-                                )
-
-                                lifecycleScope.launch {
-                                    try {
-                                        tankingsSummaryViewModel.insertTanking(newTanking)
-                                    } catch (e: Exception) {
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Error adding Tanking: ${e.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } finally {
-                                        addTankingDialog.dismiss()
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "Tanking added successfully",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        //tankingsSummaryViewModel.refreshVisibleTankings()
-                                    }
-                                }
-                            }
-                        }
-                        addTankingDialog.show()
-                    }
-
-                    is TankingEvent.HideAddTankingDialog -> TODO()
-
-                    is TankingEvent.ShowFilterDialog -> TODO()
-                    is TankingEvent.HideFilterDialog -> TODO()
-                    is TankingEvent.SetDefaultVehicle -> TODO()
-
-                    is TankingEvent.SetCurrentVehicle -> TODO()
-
-                    is TankingEvent.DeleteTanking -> TODO()
-                    is TankingEvent.EditTanking -> TODO()
+                    is TankingsSummaryEvent.ShowAddVehicleDialog -> showAddVehicleDialog()
+                    is TankingsSummaryEvent.ShowAddTankingDialog -> showAddTankingDialog()
+                    is TankingsSummaryEvent.ShowFilterDialog -> TODO()
+                    is TankingsSummaryEvent.HideFilterDialog -> TODO()
+                    is TankingsSummaryEvent.SetDefaultVehicle -> TODO()
+                    is TankingsSummaryEvent.SetCurrentVehicle -> TODO()
+                    is TankingsSummaryEvent.DeleteTanking -> TODO()
+                    is TankingsSummaryEvent.EditTanking -> TODO()
                 }
             }
         }
+    }
+
+    private fun showAddVehicleDialog() {
+        val addVehicleDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.add_vehicle_dialog, null)
+        val addVehicleDialog = AlertDialog.Builder(this@MainActivity)
+            .setView(addVehicleDialogView)
+            .setTitle("Add vehicle")
+            .setPositiveButton("Add") { dialog, _ ->
+                handleAddVehicleSubmit(addVehicleDialogView)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        val fuelPick: Spinner = addVehicleDialogView.findViewById(R.id.addVehicleDefaultFuel)
+        val fuelTypes = FuelType.entries.toTypedArray().map {
+            it.name
+        }
+        fuelPick.adapter = ArrayAdapter(
+            this@MainActivity,
+            android.R.layout.simple_spinner_item,
+            fuelTypes
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        fuelPick.setSelection(0)
+
+        addVehicleDialog.show()
+    }
+
+    private fun handleAddVehicleSubmit(view: View) {
+        val vehicleNameInput = view.findViewById<EditText>(R.id.addVehicleName).text.toString()
+        val vehicleRegistryNumberInput = view.findViewById<EditText>(R.id.addVehicleRegistryNumber).text.toString()
+        val vehicleKilometersInput = view.findViewById<EditText>(R.id.addVehicleKilometers).text.toString()
+        val defaultFuelTypeInput = (view.findViewById<Spinner>(R.id.addVehicleDefaultFuel)).selectedItem.toString()
+
+        tankingsSummaryViewModel.addVehicle(vehicleNameInput, vehicleRegistryNumberInput, vehicleKilometersInput, defaultFuelTypeInput)
+    }
+
+    private fun showAddTankingDialog() {
+        val addTankingDialogView = LayoutInflater.from(this@MainActivity).inflate(R.layout.add_tanking_dialog, null)
+        val addTankingDialog = AlertDialog.Builder(this@MainActivity)
+            .setView(addTankingDialogView)
+            .setTitle("Add tanking")
+            .create()
+
+        val fuelPick: Spinner = addTankingDialogView.findViewById(R.id.addTankingFuelType)
+        val fuelTypes = mutableListOf("No fuel selected").apply {
+            addAll(FuelType.entries.toTypedArray().map {
+                it.name
+            })
+        }
+        fuelPick.adapter = ArrayAdapter(
+            this@MainActivity,
+            android.R.layout.simple_spinner_item,
+            fuelTypes
+        ).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        fuelPick.setSelection(0) //Default to "No fuel selected"
+
+        val vehiclePick: Spinner = addTankingDialogView.findViewById(R.id.addTankingVehiclePick)
+
+        lifecycleScope.launch {
+            val recentVehicleId = tankingsSummaryViewModel.state.value.currentVehicle
+
+            val vehicles = tankingsSummaryViewModel.getAllVehiclesForAddingTanking()
+
+            val vehicleNames = mutableListOf("No vehicle selected").apply {
+                addAll(vehicles.map { it.Name ?: ( "Vehicle " + it.VehicleId + " with null name" ) })
+            }
+
+            vehiclePick.adapter = ArrayAdapter(
+                this@MainActivity,
+                android.R.layout.simple_spinner_item,
+                vehicleNames
+            ).apply {
+                setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            }
+
+            var selectedVehicle = Vehicle()
+            vehiclePick.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View, vehiclePosition: Int, id: Long) {
+                    if (vehicles.isNotEmpty()) selectedVehicle = vehicles[vehiclePosition]
+                    val fuelTypeName = selectedVehicle.DefaultFuelType?.name ?: "No fuel selected"
+                    fuelPick.setSelection(fuelTypes.indexOf(fuelTypeName).coerceAtLeast(0))
+                    //TODO("Unit test that shit. fuelTypes is passed hand-to-hand but the user may mess up the spinner somehow.")
+
+                    val kilometersBefore = selectedVehicle.Kilometers?.toString() ?: "No km stored"
+                    addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).setText(kilometersBefore)
+                }
+                override fun onNothingSelected(parent: AdapterView<*>) {}
+            }
+
+            /*
+                `recentVehicleId` is served by `ConfigurationRepository` and
+                `vehicles` are served by `VehicleRepository`
+                both using absolute indexes in `db`
+                but I'm adding a placeholder vehicle so they match 1:1+1
+                TODO("Unit test that shit.")
+            */
+            vehiclePick.setSelection((recentVehicleId?.plus(1)) ?: 0)
+
+            addTankingDialogView.findViewById<Button>(R.id.addTankingSubmit).setOnClickListener {
+                val fuelTypeText = fuelPick.selectedItem.toString()
+                val fuelType = if (fuelTypeText == "No fuel selected") {
+                    Toast.makeText(this@MainActivity, "Fuel type will be null.", Toast.LENGTH_SHORT).show()
+                    null
+                } else {
+                    FuelTypeConverter().toFuelType(fuelTypeText)
+                }
+                val kilometersBeforeText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersBefore).text.toString()
+                val kilometersAfterText = addTankingDialogView.findViewById<EditText>(R.id.addTankingKilometersAfter).text.toString()
+                val amountOfFuelText = addTankingDialogView.findViewById<EditText>(R.id.addTankingAmount).text.toString()
+                val priceText = addTankingDialogView.findViewById<EditText>(R.id.addTankingPrice).text.toString()
+
+                if (listOf(kilometersBeforeText, kilometersAfterText, amountOfFuelText, priceText, fuelTypeText).any { it.isBlank() }) {
+                    Toast.makeText(this@MainActivity, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                val newTanking = Tanking(
+                    TankingId = 0, // Room will auto-re-generate this ID
+                    VehicleId = selectedVehicle.VehicleId,
+                    KilometersBefore = kilometersBeforeText.toIntOrNull() ?: 0,
+                    KilometersAfter = kilometersAfterText.toIntOrNull() ?: 0,
+                    FuelAmount = amountOfFuelText.toFloatOrNull() ?: 0f,
+                    Timestamp = Instant.now().toEpochMilli(),
+                    Price = priceText.toFloatOrNull() ?: 0f,
+                    FuelType = fuelType,
+                    Cost = (priceText.toFloatOrNull() ?: 0f) * (amountOfFuelText.toFloatOrNull() ?: 0f)
+                )
+
+                lifecycleScope.launch {
+                    try {
+                        tankingsSummaryViewModel.insertTanking(newTanking)
+                    } catch (e: Exception) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Error adding Tanking: ${e.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } finally {
+                        addTankingDialog.dismiss()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Tanking added successfully",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        //tankingsSummaryViewModel.refreshVisibleTankings()
+                    }
+                }
+            }
+        }
+        addTankingDialog.show()
     }
 }
