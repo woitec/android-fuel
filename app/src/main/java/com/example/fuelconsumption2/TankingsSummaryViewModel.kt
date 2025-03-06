@@ -150,6 +150,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
         val kilometersInt = kilometers.toIntOrNull()
         val defaultFuelAsType = FuelTypeConverter().toFuelType(defaultFuel)
         val newVehicle = Vehicle(0, name, registry, kilometersInt, defaultFuelAsType)
-        vehicleRepository.insertVehicle(newVehicle)
+
+        viewModelScope.launch {
+            vehicleRepository.insertVehicle(newVehicle)
+        }
     }
 }
