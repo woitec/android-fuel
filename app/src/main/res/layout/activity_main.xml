@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <Spinner
-        android:id="@+id/spinnerVehicleModel"
+        android:id="@+id/spinnerCurrentVehicle"
         android:layout_width="0dp"
         android:layout_height="48dp"
         android:layout_marginStart="8dp"
@@ -29,7 +29,7 @@
         android:text="@string/buttonAddVehicle"
         app:cornerRadius="8dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerVehicleModel" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerCurrentVehicle" />
 
     <Button
         android:id="@+id/buttonFilterHistory"
@@ -42,7 +42,7 @@
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toStartOf="@+id/buttonAddFuelConsumption"
         app:layout_constraintStart_toEndOf="@+id/buttonAddVehicle"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerVehicleModel" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerCurrentVehicle" />
 
     <Button
         android:id="@+id/buttonAddFuelConsumption"
@@ -55,7 +55,7 @@
         android:text="@string/buttonAddFuelConsumption"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spinnerVehicleModel" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerCurrentVehicle" />
 
     <LinearLayout
         android:id="@+id/tankingsHeadings"

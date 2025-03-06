@@ -18,5 +18,5 @@ interface VehicleDao {
     suspend fun getAllVehiclesForAddingTanking(): List<Vehicle>
 
     @Insert
-    fun insertVehicle(vararg vehicle: Vehicle)
+    suspend fun insertVehicle(vararg vehicle: Vehicle)
 }

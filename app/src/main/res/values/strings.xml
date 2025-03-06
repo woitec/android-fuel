@@ -19,4 +19,8 @@
     <string name="headingPrice">Price (zł/L)</string>
     <string name="headingCost">Cost (zł)</string>
     <string name="headingKilometersDifference">Distance</string>
+    <string name="addVehicleName_hint">Name</string>
+    <string name="addVehicleRegistryNumber_hint">Registry number</string>
+    <string name="addVehicleKilometers_hint">Current kilometers</string>
+    <string name="addVehicleSubmit_text">Add</string>
 </resources>

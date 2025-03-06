@@ -13,7 +13,7 @@ class VehicleRepository(private val vehicleDao: VehicleDao) {
         return vehicleDao.getAllVehiclesForAddingTanking()
     }
 
-    fun insertVehicle(vararg vehicle: Vehicle) {
+    suspend fun insertVehicle(vararg vehicle: Vehicle) {
         vehicleDao.insertVehicle(*vehicle)
     }
 }
