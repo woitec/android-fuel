@@ -61,7 +61,7 @@
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/filterHistoryFuelType"
         android:layout_width="match_parent"
-        android:layout_height="24dp"
+        android:layout_height="48dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"

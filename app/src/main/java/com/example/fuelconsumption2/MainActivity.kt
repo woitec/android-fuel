@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -28,6 +29,8 @@ import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -310,6 +313,25 @@ class MainActivity : AppCompatActivity() {
                 dialog.dismiss()
             }
             .create()
+
+        val fuelTypes = FuelType.entries.toTypedArray().map {
+            it.name
+        }
+        val chipGroup =  filterHistoryDialogView.findViewById<ChipGroup>(R.id.filterHistoryFuelType)
+
+        fuelTypes.forEach { fuelType ->
+            val chip = Chip(this).apply {
+                text = fuelType
+                isCheckable = true
+                textSize = 10f
+
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+            chipGroup.addView(chip)
+        }
 
         filterHistoryDialog.show()
     }
