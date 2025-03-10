@@ -18,7 +18,7 @@ interface VehicleDao {
     suspend fun getAllVehiclesForAddingTanking(): List<Vehicle>
 
     @Query("SELECT name FROM vehicle")
-    suspend fun getAllVehiclesNames(): List<String>
+    suspend fun getAllVehiclesNames(): List<String?>
 
     @Insert
     suspend fun insertVehicle(vararg vehicle: Vehicle)

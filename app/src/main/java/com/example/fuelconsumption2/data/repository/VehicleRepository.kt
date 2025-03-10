@@ -13,7 +13,7 @@ class VehicleRepository(private val vehicleDao: VehicleDao) {
         return vehicleDao.getAllVehiclesForAddingTanking()
     }
 
-    suspend fun getAllVehiclesNames(): List<String> {
+    suspend fun getAllVehiclesNames(): List<String?> {
         return vehicleDao.getAllVehiclesNames()
     }
 
