@@ -43,7 +43,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
         viewModelScope.launch {
             if(configurationRepository.isConfigurationEmpty()) {
-                val defaultConfiguration = Configuration(1, null, null)
+                val defaultConfiguration = Configuration(1, null, null, true)
                 configurationRepository.insertConfiguration(defaultConfiguration)
             }
 

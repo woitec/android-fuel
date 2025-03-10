@@ -37,6 +37,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.Instant
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -335,15 +336,26 @@ class MainActivity : AppCompatActivity() {
             chipGroup.addView(chip)
         }
         //TODO("text size in picker or picker size, minimum 1 chip selected, applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
-
+        //TODO("Phase 2: cars chips with plus to add next (less sat color), filter icon, plus icon for tankings")
         val startDatePicker = filterHistoryDialogView.findViewById<EditText>(R.id.filterStartDatePick)
-        startDatePicker.setOnClickListener {
+        setupDatePicker(startDatePicker)
+
+        val endDatePicker = filterHistoryDialogView.findViewById<EditText>(R.id.filterEndDatePick)
+        setupDatePicker(endDatePicker)
+
+        filterHistoryDialog.show()
+    }
+
+    private fun setupDatePicker(editText: EditText) {
+        editText.isFocusable = false
+        editText.isFocusableInTouchMode = false
+        editText.setOnClickListener {
             val calendar = Calendar.getInstance()
             val datePicker = DatePickerDialog(
                 this,
                 {_, year, month, dayOfMonth ->
-                    val selectedDate = String.format("%02d-%02d-%04d", dayOfMonth, month + 1, year)
-                    startDatePicker.setText(selectedDate)
+                    val selectedDate = String.format(Locale.ENGLISH,"%02d-%02d-%04d", dayOfMonth, month + 1, year)
+                    editText.setText(selectedDate)
                 },
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
@@ -351,8 +363,6 @@ class MainActivity : AppCompatActivity() {
             )
             datePicker.show()
         }
-
-        filterHistoryDialog.show()
     }
 
     private fun handleFilterHistorySubmit(view: View) {

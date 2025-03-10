@@ -8,5 +8,6 @@ import androidx.room.PrimaryKey
 data class Configuration (
     @PrimaryKey(autoGenerate = true) val ConfigurationId: Int,
     @ColumnInfo(name = "recent_vehicle_id") val RecentVehicleId: Int?,
-    @ColumnInfo(name = "filter_preferences") val FilterPreferences: String?
+    @ColumnInfo(name = "filter_preferences") val FilterPreferences: String?,
+    @ColumnInfo(name = "car_list_or_chips") val CarListOrChips: Boolean
     )
