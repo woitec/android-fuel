@@ -321,21 +321,39 @@ class MainActivity : AppCompatActivity() {
             it.name
         }
         val chipGroup =  filterHistoryDialogView.findViewById<ChipGroup>(R.id.filterHistoryFuelType)
+        val selectedFuelTypes = mutableSetOf<String>()
 
-        fuelTypes.forEach { fuelType ->
+        fuelTypes.forEachIndexed { index, fuelType ->
             val chip = Chip(this).apply {
                 text = fuelType
                 isCheckable = true
                 textSize = 10f
+                if(index == 0) {
+                    isChecked = true
+                    selectedFuelTypes.add(fuelType)
+                }
 
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
+
+                setOnClickListener {
+                    if(isChecked) {
+                        selectedFuelTypes.add(fuelType)
+                    } else {
+                        if(selectedFuelTypes.size == 1) {
+                            isChecked = true
+                            Toast.makeText(context, "At least 1 fuel type must be selected.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            selectedFuelTypes.remove(fuelType)
+                        }
+                    }
+                }
             }
             chipGroup.addView(chip)
         }
-        //TODO("text size in picker or picker size, minimum 1 chip selected, applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
+        //TODO("minimum 1 chip selected, applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
         //TODO("Phase 2: cars chips with plus to add next (less sat color), filter icon, plus icon for tankings")
         val startDatePicker = filterHistoryDialogView.findViewById<EditText>(R.id.filterStartDatePick)
         setupDatePicker(startDatePicker)
