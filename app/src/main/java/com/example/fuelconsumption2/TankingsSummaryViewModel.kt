@@ -11,6 +11,7 @@ import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
+import com.example.fuelconsumption2.enums.ListOrChips
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -43,7 +44,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
         viewModelScope.launch {
             if(configurationRepository.isConfigurationEmpty()) {
-                val defaultConfiguration = Configuration(1, null, null, true)
+                val defaultConfiguration = Configuration(1, null, null, ListOrChips.LIST)
                 configurationRepository.insertConfiguration(defaultConfiguration)
             }
 

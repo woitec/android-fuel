@@ -3,11 +3,12 @@ package com.example.fuelconsumption2.data.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.fuelconsumption2.enums.ListOrChips
 
 @Entity (tableName = "configuration")
 data class Configuration (
     @PrimaryKey(autoGenerate = true) val ConfigurationId: Int,
     @ColumnInfo(name = "recent_vehicle_id") val RecentVehicleId: Int?,
     @ColumnInfo(name = "filter_preferences") val FilterPreferences: String?,
-    @ColumnInfo(name = "car_list_or_chips") val CarListOrChips: Boolean
+    @ColumnInfo(name = "car_list_or_chips") val CarListOrChips: ListOrChips
     )

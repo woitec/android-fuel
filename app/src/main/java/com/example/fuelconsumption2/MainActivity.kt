@@ -31,6 +31,7 @@ import com.example.fuelconsumption2.data.entities.Tanking
 import com.example.fuelconsumption2.data.entities.Vehicle
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.FuelType
+import com.example.fuelconsumption2.enums.ListOrChips
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -83,6 +84,29 @@ class MainActivity : AppCompatActivity() {
         findViewById<RecyclerView?>(R.id.tankingsView).apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = tankingsRecyclerAdapter
+        }
+
+        lifecycleScope.launch {
+            tankingsSummaryViewModel.state
+                .map { state ->
+                    Pair(state.carsAsListOrChips, state.availableVehicles)
+                }
+                .distinctUntilChanged()
+                .collect {
+                    if(it.first == ListOrChips.LIST) {
+                        val currentVehicleSpinner: Spinner = findViewById(R.id.spinnerCurrentVehicle)
+                        currentVehicleSpinner.adapter = ArrayAdapter(
+                            this@MainActivity,
+                            android.R.layout.simple_spinner_item,
+                            it.second
+                        ).apply {
+                            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                        }
+                        currentVehicleSpinner.setSelection(0)
+                    } else {
+                        //TODO("chips and plus")
+                    }
+                }
         }
 
         lifecycleScope.launch {

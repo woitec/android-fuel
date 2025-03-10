@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import com.example.fuelconsumption2.data.entities.Tanking
+import com.example.fuelconsumption2.enums.ListOrChips
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.time.ZoneId
@@ -19,5 +20,6 @@ data class TankingsSummaryState(
     val currentVehicle: Int? = null,
     val availableVehicles: List<String> = mutableListOf(),
     val historyFilterStart: Long? = null,
-    val historyFilterEnd: Long? = null
+    val historyFilterEnd: Long? = null,
+    val carsAsListOrChips: ListOrChips = ListOrChips.LIST
     )
