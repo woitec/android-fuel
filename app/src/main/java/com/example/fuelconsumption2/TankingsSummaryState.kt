@@ -17,6 +17,7 @@ data class TankingsSummaryState(
     val isFilteringHistory: Boolean = false,
     val isAddingTanking: Boolean = false,
     val currentVehicle: Int? = null,
+    val availableVehicles: List<String> = mutableListOf(),
     val historyFilterStart: Long? = null,
     val historyFilterEnd: Long? = null
     )

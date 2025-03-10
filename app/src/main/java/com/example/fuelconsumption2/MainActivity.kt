@@ -353,7 +353,7 @@ class MainActivity : AppCompatActivity() {
             }
             chipGroup.addView(chip)
         }
-        //TODO("minimum 1 chip selected, applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
+        //TODO("applying filters to the list, picking a vehicle in the top spinner, populating top spinner on startup")
         //TODO("Phase 2: cars chips with plus to add next (less sat color), filter icon, plus icon for tankings")
         val startDatePicker = filterHistoryDialogView.findViewById<EditText>(R.id.filterStartDatePick)
         setupDatePicker(startDatePicker)

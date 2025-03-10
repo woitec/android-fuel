@@ -47,6 +47,8 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                 configurationRepository.insertConfiguration(defaultConfiguration)
             }
 
+            val availableVehiclesFetched = vehicleRepository.getAllVehiclesNames()
+
             val recentVehicleId = configurationRepository.getRecentVehicleId()
 
             val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
@@ -68,6 +70,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     averageConsumption = averageConsumption,
                     averageCost = averageCost,
                     currentVehicle = recentVehicleId,
+                    availableVehicles = availableVehiclesFetched,
                     historyFilterStart = historyStart,
                     historyFilterEnd = historyEnd
                 )
