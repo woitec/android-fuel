@@ -89,22 +89,24 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             tankingsSummaryViewModel.state
                 .map { state ->
-                    Pair(state.carsAsListOrChips, state.availableVehicles)
+                    Triple(state.carsAsListOrChips, state.availableVehicles, state.currentVehicle)
                 }
                 .distinctUntilChanged()
-                .collect {
-                    if(it.first == ListOrChips.LIST) {
+                .collect { (carsAsListOrChips, availableVehicles, currentVehicle) ->
+                    if(carsAsListOrChips == ListOrChips.LIST) {
                         val currentVehicleSpinner: Spinner = findViewById(R.id.spinnerCurrentVehicle)
                         currentVehicleSpinner.adapter = ArrayAdapter(
                             this@MainActivity,
                             android.R.layout.simple_spinner_item,
-                            it.second
+                            availableVehicles
                         ).apply {
                             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         }
-                        currentVehicleSpinner.setSelection(0)
-                    } else {
+                        currentVehicleSpinner.setSelection(currentVehicle ?: 0)
+                    } else if(carsAsListOrChips == ListOrChips.CHIPS) {
                         //TODO("chips and plus")
+                    } else {
+                        //TODO("handle null")
                     }
                 }
         }
