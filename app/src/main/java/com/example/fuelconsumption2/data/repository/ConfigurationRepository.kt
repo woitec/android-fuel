@@ -4,6 +4,8 @@ import com.example.fuelconsumption2.data.AppDatabase
 import com.example.fuelconsumption2.data.dao.ConfigurationDao
 import com.example.fuelconsumption2.data.entities.Configuration
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class ConfigurationRepository(private val configurationDao: ConfigurationDao) {
@@ -11,13 +13,13 @@ class ConfigurationRepository(private val configurationDao: ConfigurationDao) {
         return configurationDao.getConfiguration()
     }
 
-    suspend fun getRecentVehicleId(): Int? {
-        val configuration = configurationDao.getConfiguration()
-        return if(configuration == null) {
-            -1
-        } else {
-            configuration.RecentVehicleId
-        }
+    fun getRecentVehicleId(): Flow<Int> {
+        return configurationDao.getRecentVehicleId()
+            .map { it ?: 0 }
+    }
+
+    fun setRecentVehicle(id: Int, vehicleId: Int?) {
+        configurationDao.updateRecentVehicle(id, vehicleId)
     }
 
     suspend fun insertConfiguration(vararg configuration: Configuration) {

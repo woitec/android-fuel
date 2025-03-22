@@ -12,12 +12,14 @@ import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
 import com.example.fuelconsumption2.enums.ListOrChips
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -50,31 +52,41 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
             val availableVehiclesFetched = vehicleRepository.getAllVehiclesNames()
 
-            val recentVehicleId = configurationRepository.getRecentVehicleId()
+            configurationRepository.getRecentVehicleId().collect { recentVehicleId ->
+                _state.update {
+                    it.copy(currentVehicle = recentVehicleId)
+                }
 
-            val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(recentVehicleId, historyStart, historyEnd)
-            _currentTankings.value = fetchedCurrentTankings
-            calculateAverages(fetchedCurrentTankings)
-            Log.d("TEST", fetchedCurrentTankings.toString())
-
-            val totalFuel = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.FuelAmount ?: 0f) }
-            val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
-            val kilometersAfter = _currentTankings.value.lastOrNull()?.KilometersAfter ?: 0
-            val totalKm = kilometersBefore - kilometersAfter
-            val totalCost = _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.Cost ?: 0f) }
-            val averageCost = if (totalKm > 0) totalCost / totalKm * 100 else 0f
-            val averageConsumption = if (totalKm > 0) (totalFuel / totalKm) * 100 else 0f
-
-            _state.update {
-                it.copy(
-                    currentDate = SteroidDate(currentTimestamp.toEpochMilli()),
-                    averageConsumption = averageConsumption,
-                    averageCost = averageCost,
-                    currentVehicle = recentVehicleId,
-                    availableVehicles = availableVehiclesFetched,
-                    historyFilterStart = historyStart,
-                    historyFilterEnd = historyEnd
+                val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
+                    _state.value.currentVehicle,
+                    historyStart,
+                    historyEnd
                 )
+                _currentTankings.value = fetchedCurrentTankings
+                calculateAverages(fetchedCurrentTankings)
+                Log.d("TEST", fetchedCurrentTankings.toString())
+
+                val totalFuel = _currentTankings.value.fold(0f) { acc, tanking ->
+                    acc + (tanking.FuelAmount ?: 0f)
+                }
+                val kilometersBefore = _currentTankings.value.firstOrNull()?.KilometersBefore ?: 0
+                val kilometersAfter = _currentTankings.value.lastOrNull()?.KilometersAfter ?: 0
+                val totalKm = kilometersBefore - kilometersAfter
+                val totalCost =
+                    _currentTankings.value.fold(0f) { acc, tanking -> acc + (tanking.Cost ?: 0f) }
+                val averageCost = if (totalKm > 0) totalCost / totalKm * 100 else 0f
+                val averageConsumption = if (totalKm > 0) (totalFuel / totalKm) * 100 else 0f
+
+                _state.update {
+                    it.copy(
+                        currentDate = SteroidDate(currentTimestamp.toEpochMilli()),
+                        averageConsumption = averageConsumption,
+                        averageCost = averageCost,
+                        availableVehicles = availableVehiclesFetched,
+                        historyFilterStart = historyStart,
+                        historyFilterEnd = historyEnd
+                    )
+                }
             }
         }
     }
@@ -157,6 +169,13 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
 
         viewModelScope.launch {
             vehicleRepository.insertVehicle(newVehicle)
+        }
+    }
+
+    fun setCurrentVehicle(vehicleId: Int?) {
+        val configurationId = state.value.currentConfiguration
+        viewModelScope.launch(Dispatchers.IO) {
+            configurationRepository.setRecentVehicle(configurationId, vehicleId)
         }
     }
 }

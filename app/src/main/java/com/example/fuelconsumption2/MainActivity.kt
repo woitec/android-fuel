@@ -103,6 +103,14 @@ class MainActivity : AppCompatActivity() {
                             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         }
                         currentVehicleSpinner.setSelection(currentVehicle ?: 0)
+                        currentVehicleSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected( p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                                tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.SetCurrentVehicle(p2))
+                            }
+                            override fun onNothingSelected(p0: AdapterView<*>?) {
+                                TODO("Not yet implemented")
+                            }
+                        }
                     } else if(carsAsListOrChips == ListOrChips.CHIPS) {
                         //TODO("chips and plus")
                     } else {
@@ -165,13 +173,15 @@ class MainActivity : AppCompatActivity() {
                     is TankingsSummaryEvent.ShowAddVehicleDialog -> showAddVehicleDialog()
                     is TankingsSummaryEvent.ShowAddTankingDialog -> showAddTankingDialog()
                     is TankingsSummaryEvent.ShowFilterDialog -> showFilterDialog()
-                    is TankingsSummaryEvent.SetDefaultVehicle -> TODO()
-                    is TankingsSummaryEvent.SetCurrentVehicle -> TODO()
+                    is TankingsSummaryEvent.SetCurrentVehicle -> setCurrentVehicle(event.vehicleId)
                     is TankingsSummaryEvent.DeleteTanking -> TODO()
                     is TankingsSummaryEvent.EditTanking -> TODO()
                 }
             }
         }
+    }
+    private fun setCurrentVehicle(vehicleId: Int?) {
+        tankingsSummaryViewModel.setCurrentVehicle(vehicleId)
     }
 
     private fun showAddVehicleDialog() {
