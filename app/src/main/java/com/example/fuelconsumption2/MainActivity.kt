@@ -89,22 +89,32 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             tankingsSummaryViewModel.state
                 .map { state ->
-                    Pair(state.carsAsListOrChips, state.availableVehicles)
+                    Triple(state.carsAsListOrChips, state.availableVehicles, state.currentVehicle)
                 }
                 .distinctUntilChanged()
-                .collect {
-                    if(it.first == ListOrChips.LIST) {
+                .collect { (carsAsListOrChips, availableVehicles, currentVehicle) ->
+                    if(carsAsListOrChips == ListOrChips.LIST) {
                         val currentVehicleSpinner: Spinner = findViewById(R.id.spinnerCurrentVehicle)
                         currentVehicleSpinner.adapter = ArrayAdapter(
                             this@MainActivity,
                             android.R.layout.simple_spinner_item,
-                            it.second
+                            availableVehicles
                         ).apply {
                             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                         }
-                        currentVehicleSpinner.setSelection(0)
-                    } else {
+                        currentVehicleSpinner.setSelection(currentVehicle ?: 0)
+                        currentVehicleSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                            override fun onItemSelected( p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                                tankingsSummaryViewModel.onEvent(TankingsSummaryEvent.SetCurrentVehicle(p2))
+                            }
+                            override fun onNothingSelected(p0: AdapterView<*>?) {
+                                TODO("Not yet implemented")
+                            }
+                        }
+                    } else if(carsAsListOrChips == ListOrChips.CHIPS) {
                         //TODO("chips and plus")
+                    } else {
+                        //TODO("handle null")
                     }
                 }
         }
@@ -163,13 +173,15 @@ class MainActivity : AppCompatActivity() {
                     is TankingsSummaryEvent.ShowAddVehicleDialog -> showAddVehicleDialog()
                     is TankingsSummaryEvent.ShowAddTankingDialog -> showAddTankingDialog()
                     is TankingsSummaryEvent.ShowFilterDialog -> showFilterDialog()
-                    is TankingsSummaryEvent.SetDefaultVehicle -> TODO()
-                    is TankingsSummaryEvent.SetCurrentVehicle -> TODO()
+                    is TankingsSummaryEvent.SetCurrentVehicle -> setCurrentVehicle(event.vehicleId)
                     is TankingsSummaryEvent.DeleteTanking -> TODO()
                     is TankingsSummaryEvent.EditTanking -> TODO()
                 }
             }
         }
+    }
+    private fun setCurrentVehicle(vehicleId: Int?) {
+        tankingsSummaryViewModel.setCurrentVehicle(vehicleId)
     }
 
     private fun showAddVehicleDialog() {
