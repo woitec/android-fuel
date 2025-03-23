@@ -1,14 +1,10 @@
 package com.example.fuelconsumption2.data.repository
 
-import com.example.fuelconsumption2.SteroidDate
 import com.example.fuelconsumption2.data.dao.TankingDao
 import com.example.fuelconsumption2.data.entities.Tanking
+import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 
 class TankingRepository(private val tankingDao: TankingDao) {
@@ -28,7 +24,7 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return tankingDao.getAllTankings()
     }
 
-    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int?, start: Long?, end: Long?): List<Tanking> {
+    suspend fun getAllTankingsInBetweenByVehicleIdAndFuel(vehicleId: Int?, fuelTypes: List<FuelType?>, start: Long?, end: Long?): List<Tanking> {
         var nonNullVehicleId = -1
         if(vehicleId !== null) {
             nonNullVehicleId = vehicleId
@@ -36,8 +32,10 @@ class TankingRepository(private val tankingDao: TankingDao) {
         return if (start == null || end == null) {
             emptyList()
         } else {
-            tankingDao.getAllTankingsInBetweenByVehicleId(
+            val fuels = fuelTypes.map { it?.name }
+            tankingDao.getAllTankingsInBetweenByVehicleIdAndFuel(
                 nonNullVehicleId,
+                fuels,
                 start,
                 end
             )

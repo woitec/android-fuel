@@ -1,13 +1,11 @@
 package com.example.fuelconsumption2.data.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.example.fuelconsumption2.data.entities.Tanking
+import com.example.fuelconsumption2.enums.FuelType
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 @Dao
 interface TankingDao {
@@ -26,8 +24,8 @@ interface TankingDao {
     @Query("SELECT fuel_amount FROM tanking WHERE vehicle_id = :vehicleId")
     fun getAllFuelAmountsByVehicleId(vehicleId: Int): Flow<List<Float?>>
 
-    @Query("SELECT * FROM tanking WHERE vehicle_id = :vehicleId AND timestamp BETWEEN :start AND :end")
-    suspend fun getAllTankingsInBetweenByVehicleId(vehicleId: Int, start: Long, end: Long): List<Tanking>
+    @Query("SELECT * FROM tanking WHERE fuel_type IN (:fuels) AND vehicle_id = :vehicleId AND timestamp BETWEEN :start AND :end")
+    suspend fun getAllTankingsInBetweenByVehicleIdAndFuel(vehicleId: Int, fuels: List<String?>,start: Long, end: Long): List<Tanking>
 
 //TODO("Change it to ByCurrentVehicle - from config table")
 }

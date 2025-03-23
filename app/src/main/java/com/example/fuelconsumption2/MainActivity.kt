@@ -423,5 +423,14 @@ class MainActivity : AppCompatActivity() {
         val startDate = SteroidDate.fromFormat(view.findViewById<EditText>(R.id.filterStartDatePick).text.toString())?.getTimestamp()
         val endDate = SteroidDate.fromFormat(view.findViewById<EditText>(R.id.filterEndDatePick).text.toString())?.getTimestamp()
         val fuelTypesGroup = view.findViewById<ChipGroup>(R.id.filterHistoryFuelType)
+
+        val selectedFuelTypes = mutableListOf<FuelType?>()
+        for( i in 0 until fuelTypesGroup.childCount) {
+            val chip = fuelTypesGroup.getChildAt(i) as? Chip
+            if(chip?.isChecked == true)
+                selectedFuelTypes.add(FuelTypeConverter().toFuelType(chip.text.toString()))
+        }
+
+        tankingsSummaryViewModel.applyFilters(startDate, endDate, selectedFuelTypes)
     }
 }

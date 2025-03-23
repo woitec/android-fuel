@@ -11,6 +11,7 @@ import com.example.fuelconsumption2.data.repository.ConfigurationRepository
 import com.example.fuelconsumption2.data.repository.TankingRepository
 import com.example.fuelconsumption2.data.repository.VehicleRepository
 import com.example.fuelconsumption2.data.typeConverters.FuelTypeConverter
+import com.example.fuelconsumption2.enums.FuelType
 import com.example.fuelconsumption2.enums.ListOrChips
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -19,7 +20,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -57,8 +57,9 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
                     it.copy(currentVehicle = recentVehicleId)
                 }
 
-                val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(
+                val fetchedCurrentTankings = tankingRepository.getAllTankingsInBetweenByVehicleIdAndFuel(
                     _state.value.currentVehicle,
+                    _state.value.filteredFuels,
                     historyStart,
                     historyEnd
                 )
@@ -119,7 +120,7 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
     }
 
     suspend fun updateCurrentTankings(start: Long?, end: Long?) {
-        val newTankings = tankingRepository.getAllTankingsInBetweenByVehicleId(_state.value.currentVehicle, start, end)
+        val newTankings = tankingRepository.getAllTankingsInBetweenByVehicleIdAndFuel(_state.value.currentVehicle, _state.value.filteredFuels,start, end)
         _currentTankings.value = newTankings
         calculateAverages(newTankings)
     }
@@ -147,6 +148,16 @@ class TankingsSummaryViewModel(private val db: AppDatabase): ViewModel() {
             it.copy(
                 averageConsumption = averageConsumption,
                 averageCost = averageCost
+            )
+        }
+    }
+
+    fun applyFilters(startDate: Long?, endDate: Long?, selectedFuelTypes: List<FuelType?>) {
+        _state.update {
+            it.copy(
+                filteredFuels = selectedFuelTypes,
+                historyFilterStart = startDate,
+                historyFilterEnd = endDate
             )
         }
     }
