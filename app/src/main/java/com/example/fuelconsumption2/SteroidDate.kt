@@ -1,5 +1,6 @@
 package com.example.fuelconsumption2
 
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -31,6 +32,15 @@ class SteroidDate(private val timestamp: Long?) {
     }
 
     companion object {
+        fun fromFormat(date: String): SteroidDate? {
+            return try {
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                SteroidDate(dateFormat.parse(date)?.time)
+            } catch (e: ParseException) {
+                null
+            }
+        }
+
         fun oneYearBefore(time: Instant): SteroidDate {
             return SteroidDate(time.atZone(ZoneId.systemDefault())
                 .toLocalDate()

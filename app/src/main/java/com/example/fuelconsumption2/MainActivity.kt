@@ -408,7 +408,7 @@ class MainActivity : AppCompatActivity() {
             val datePicker = DatePickerDialog(
                 this,
                 {_, year, month, dayOfMonth ->
-                    val selectedDate = String.format(Locale.ENGLISH,"%02d-%02d-%04d", dayOfMonth, month + 1, year)
+                    val selectedDate = String.format(Locale.ENGLISH,"%04d-%02d-%02d", year, month + 1, dayOfMonth)
                     editText.setText(selectedDate)
                 },
                 calendar.get(Calendar.YEAR),
@@ -420,6 +420,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handleFilterHistorySubmit(view: View) {
-
+        val startDate = SteroidDate.fromFormat(view.findViewById<EditText>(R.id.filterStartDatePick).text.toString())?.getTimestamp()
+        val endDate = SteroidDate.fromFormat(view.findViewById<EditText>(R.id.filterEndDatePick).text.toString())?.getTimestamp()
+        val fuelTypesGroup = view.findViewById<ChipGroup>(R.id.filterHistoryFuelType)
     }
 }
